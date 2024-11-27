@@ -25,6 +25,7 @@ You'll need:
 Create the following file depending on your OS
 
 On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+
 On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 
 Paste this template in the file and replace `<TINYBIRD_API_URL>` and `<TINYBIRD_ADMIN_TOKEN>` with your Tinybird API URL and Admin Token:
