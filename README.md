@@ -57,7 +57,7 @@ For Claude Desktop add an `env` config in your `claude_desktop_config.json`:
     "tinybird_mcp_claude": {
       "command": "uvx",
       "args": [
-        "tinybird_mcp_claude"
+        "tinybird-mcp-claude"
       ],
       "env": {
         "TB_API_URL": "your_tinybird_api_url",
@@ -80,13 +80,13 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
   <summary>Development/Unpublished Servers Configuration</summary>
   ```
   "mcpServers": {
-    "tinybird_mcp_claude": {
+    "tinybird_mcp_claude_local": {
       "command": "uv",
       "args": [
         "--directory",
         "/Users/alrocar/gr/tinybird_mcp_claude",
         "run",
-        "tinybird_mcp_claude"
+        "tinybird-mcp-claude"
       ]
     }
   }
@@ -100,7 +100,7 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
     "tinybird_mcp_claude": {
       "command": "uvx",
       "args": [
-        "tinybird_mcp_claude"
+        "tinybird-mcp-claude"
       ]
     }
   }
