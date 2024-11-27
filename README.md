@@ -1,15 +1,56 @@
 # tinybird_mcp_claude MCP server
 
-A MCP server for Claude to interact with a Tinybird Workspace
+A MCP server for Claude to interact with a Tinybird Workspace.
 
-## Components
+## Features
 
-### Resources
+- Query Tinybird Data Sources using the Tinybird Query API
+- Get the result of existing Tinybird API Endpoints with HTTP requests
 
-The server implements an integration with a Tinybird Workspace to run analytical queries and get an insights memo:
-- Custom tinybird:// URI scheme for accessing memos
+## Setup
 
-### Prompts
+### Prerequisites
+
+MCP is still very new and evolving, we recommend following the [MCP documentation](https://modelcontextprotocol.io/quickstart#prerequisites) to get the MCP basics up and running.
+
+You'll need:
+- [Tinybird Account & Workspace](https://www.tinybird.co/)
+- [Claude Desktop](https://claude.ai/)
+- [uv](https://docs.astral.sh/uv/getting-started/installation/)
+
+### Configuration
+
+#### 1. Configure Claude Desktop
+
+Create the following file depending on your OS
+
+On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+
+Paste this template in the file and replace `<TINYBIRD_API_URL>` and `<TINYBIRD_ADMIN_TOKEN>` with your Tinybird API URL and Admin Token:
+
+```json
+{
+    "mcpServers": {
+        "tinybird_mcp_claude": {
+            "command": "uvx",
+            "args": [
+                "tinybird-mcp-claude"
+            ],
+            "env": {
+                "TB_API_URL": "<TINYBIRD_API_URL>",
+                "TB_ADMIN_TOKEN": "<TINYBIRD_ADMIN_TOKEN>"
+            }
+        }
+    }
+}
+```
+
+#### 2. Restart Claude Desktop
+
+
+## Prompts
 
 The server provides a single prompt:
 - [tinybird-default](https://github.com/tinybirdco/tinybird_mcp_claude/blob/93dd9e1d3c0e33f408fe88297151a44c1dfc049c/src/tinybird_mcp_claude/server.py#L20): Assumes you have loaded some data in Tinybird and want help exploring it.
@@ -26,7 +67,7 @@ SCHEMA >
     `prompt` String `json:$.prompt`
 ```
 
-### Tools
+## Tools
 
 The server implements several tools to interact with the Tinybird Workspace:
 - `list-data-sources`: Lists all Data Sources in the Tinybird Workspace
@@ -39,10 +80,10 @@ The server implements several tools to interact with the Tinybird Workspace:
 - `llms-tinybird-docs`: Contains the whole Tinybird product documentation, so you can use it to get context about what Tinybird is, what it does, API reference and more.
 - `save-event`: This allows to send an event to a Tinybird Data Source. Use it to save a user generated prompt to the prompts Data Source. The MCP server feeds from the prompts Data Source on initialization so the user can instruct the LLM the workflow to follow.
 
-## Configuration
 
-The MCP requires two environment variables to interact with the Tinybird Workspace.
+## Development
 
+### Config 
 If you are working locally add two environment variables to a `.env` file in the root of the repository:
 
 ```sh
@@ -50,35 +91,8 @@ TB_API_URL=
 TB_ADMIN_TOKEN=
 ```
 
-For Claude Desktop add an `env` config in your `claude_desktop_config.json`:
-
 ```json
-"mcpServers": {
-    "tinybird_mcp_claude": {
-      "command": "uvx",
-      "args": [
-        "tinybird-mcp-claude"
-      ],
-      "env": {
-        "TB_API_URL": "your_tinybird_api_url",
-        "TB_ADMIN_TOKEN": "your_tinybird_workspace_admin_token"
-      }
-    }
-  }
-```
-
-## Quickstart
-
-### Install
-
-#### Claude Desktop
-
-On MacOS: `~/Library/Application\ Support/Claude/claude_desktop_config.json`
-On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
-
-<details>
-  <summary>Development/Unpublished Servers Configuration</summary>
-  ```
+{
   "mcpServers": {
     "tinybird_mcp_claude_local": {
       "command": "uv",
@@ -90,24 +104,8 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
       ]
     }
   }
-  ```
-</details>
-
-<details>
-  <summary>Published Servers Configuration</summary>
-  ```
-  "mcpServers": {
-    "tinybird_mcp_claude": {
-      "command": "uvx",
-      "args": [
-        "tinybird-mcp-claude"
-      ]
-    }
-  }
-  ```
-</details>
-
-## Development
+}
+```
 
 ### Building and Publishing
 
@@ -145,6 +143,5 @@ You can launch the MCP Inspector via [`npm`](https://docs.npmjs.com/downloading-
 ```bash
 npx @modelcontextprotocol/inspector uv --directory /Users/alrocar/gr/tinybird_mcp_claude run tinybird-mcp-claude
 ```
-
 
 Upon launching, the Inspector will display a URL that you can access in your browser to begin debugging.
