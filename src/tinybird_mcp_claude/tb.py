@@ -83,17 +83,17 @@ class APIClient:
 
     def _synthesize_memo(self) -> str:
         if not self.insights:
-            return "No business insights have been discovered yet."
+            return "No insights have been discovered yet."
 
         insights = "\n".join(f"- {insight}" for insight in self.insights)
 
-        memo = "📊 Business Intelligence Memo 📊\n\n"
+        memo = "📊 Analysis Memo 📊\n\n"
         memo += "Key Insights Discovered:\n\n"
         memo += insights
 
         if len(self.insights) > 1:
             memo += "\nSummary:\n"
-            memo += f"Analysis has revealed {len(self.insights)} key business insights that suggest opportunities for strategic optimization and growth."
+            memo += f"Analysis has revealed {len(self.insights)} key insights."
 
         return memo
 

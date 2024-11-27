@@ -12,8 +12,8 @@ The server implements an integration with a Tinybird Workspace to run analytical
 ### Prompts
 
 The server provides a single prompt:
-- [tinybird-demo](https://github.com/tinybirdcohttps://github.com/tinybirdco/tinybird_mcp_claude/blob/93dd9e1d3c0e33f408fe88297151a44c1dfc049c/src/tinybird_mcp_claude/server.py#L20): Assumes you are a business analyst looking for insights in the Tinybird Workspace
-  - Required "topic" argument to define the business analytics memo topic
+- [tinybird-default](https://github.com/tinybirdco/tinybird_mcp_claude/blob/93dd9e1d3c0e33f408fe88297151a44c1dfc049c/src/tinybird_mcp_claude/server.py#L20): Assumes you have loaded some data in Tinybird and want help exploring it.
+  - Requires a "topic" argument which defines the topic of the data you want to explore, for example, "Bluesky data" or "retail sales".
 
 You can configure additional prompt workflows:
   - Create a prompts Data Source in your workspace with this schema and append your prompts. The MCP loads `prompts` on initialization so you can configure it to your needs:

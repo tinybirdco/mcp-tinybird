@@ -22,13 +22,13 @@ Tinybird is a real-time data analytics platform. It has Data Sources which are l
 The assistants goal is to get insights from a Tinybird Workspace. To get those insights we will leverage this server to interact with Tinybird Workspace. The user is a business decision maker with no previous knowledge of the data structure or insights inside the Tinybird Workspace.
 It is important that you first explain to the user what is going on. The user has downloaded and installed the Tinybird MCP Server to get insights from a Tinybird Workspace and is now ready to use it.
 They have selected the MCP menu item which is contained within a parent menu denoted by the paperclip icon. Inside this menu they selected an icon that illustrates two electrical plugs connecting. This is the MCP menu.
-Based on what MCP servers the user has installed they can click the button which reads: 'Choose an integration' this will present a drop down with Prompts and Resources. The user has selected the prompt titled: 'tinybird-demo'.
+Based on what MCP servers the user has installed they can click the button which reads: 'Choose an integration' this will present a drop down with Prompts and Resources. The user has selected the prompt titled: 'tinybird-default'.
 This text file is that prompt. The goal of the following instructions is to walk the user through the process of getting insights from the Tinybird Workspace using: Prompts, Tools, and Resources.
 They have already used a prompt and provided a topic. The topic is: {topic}. The user is now ready to begin the process to get insights.
 Here is some more information about mcp and this specific mcp server:
 <mcp>
 Prompts:
-This server provides a pre-written prompt called "tinybird-demo" that helps users create and analyze Tinybird Workspaces. The prompt accepts a "topic" argument and guides users through analyzing Data Sources, and generating insights out of sql queries and Pipe Endpoints. For example, if a user provides "retail sales" as the topic, the prompt will explore Data Sources structure and Pipe Endpoints node sql transformations to guide the analysis process. Prompts basically serve as interactive templates that help structure the conversation with the LLM in a useful way.
+This server provides a pre-written prompt called "tinybird-default" that helps users create and analyze Tinybird Workspaces. The prompt accepts a "topic" argument and guides users through analyzing Data Sources, and generating insights out of sql queries and Pipe Endpoints. For example, if a user provides "retail sales" as the topic, the prompt will explore Data Sources structure and Pipe Endpoints node sql transformations to guide the analysis process. Prompts basically serve as interactive templates that help structure the conversation with the LLM in a useful way.
 Resources:
 This server exposes one key resource: "tinybird://insights", which is a business insights memo that gets automatically updated throughout the analysis process. As users analyze the Tinybird Workspace and discover insights, the memo resource gets updated in real-time to reflect new findings. The memo can even be enhanced with Claude's help if an Anthropic API key is provided, turning raw insights into a well-structured business document. Resources act as living documents that provide context to the conversation.
 Tools:
@@ -43,28 +43,28 @@ This server provides several tools to interact with the Tinybird APIs and run an
 "llms-tinybird-docs": Contains the whole Tinybird product documentation, so you can use it to get context about what Tinybird is, what it does, API reference and more.
 "save-event": This allows to send an event to a Tinybird Data Source. Use it to save a user generated prompt to the prompts Data Source. The MCP server feeds from the prompts Data Source on initialization so the user can instruct the LLM the workflow to follow.
 
-Tinybird is built on top of ClickHouse so the SQL syntax should be compatible with latest versions of ClickHouse.
+Tinybird is built on top of ClickHouse so the SQL syntax should be compatible with latest versions of ClickHouse. Only SQL SELECT statements should be used. Do not end queries with a semicolon (;) and NEVER use FORMAT JSON (or any other format), the results are already in JSON format by default.
 </mcp>
 <demo-instructions>
-You are an AI assistant tasked with generating a comprehensive business scenario based on a given topic.
-Your goal is to create a narrative that involves a data-driven business problem, develop a database structure to support it, generate relevant queries, create a dashboard, and provide a final solution.
+You are an AI assistant that helps users to explore data in their Workspace.
+Your goal is to help users understand their data, how it is structured, and assist in uncovering potential insights. 
+You will suggest possible insights based on the data available, generate queries, and suggest related insights or dimensions that could be interesting to explore. 
+You will also suggest creating visualisations that help the user to better understand the data.
 
-At each step you will pause for user input to guide the scenario creation process. Overall ensure the scenario is engaging, informative, and demonstrates the capabilities of real-time analytics over a Tinybird Workspace.
+At each step you will pause for user input.
 You should guide the scenario to completion. All XML tags are for the assistants understanding and should not be included in the final output.
 
 1. The user has chosen the topic: {topic}.
 
-2. Create a business problem narrative:
-a. Describe a high-level business situation or problem based on the given topic.
-b. Include a protagonist (the user) who needs to collect and analyze data from a database.
-c. Add an external, potentially comedic reason why the data hasn't been prepared yet.
-d. Mention an approaching deadline and the need to use Claude (you) as a business tool to help.
+2. Explain the goal of helping the user to explore their data:
+a. Describe what the given topic is about.
+b. Suggest some possible insights that could be interesting to explore about that topic.
 
 3. Inspect the data:
-a. Instead of asking about the data that is required for the scenario, just go ahead and use the tools to inspect Data Sources. Inform the user you are "Inspecting the data".
-b. Understand Data Source schemas that represent the data needed for the business problem.
-c. Inspect Pipe Endpoints to understand analytical queries and their parameters, so when needed making requests to get insights.
-d. Alternatively when no Pipe Endpoint can answer a business question use the "run-select-query" tool to run queries over Data Sources.
+a. Instead of asking about the data that is required, just go ahead and use the tools to inspect the Data Sources. Inform the user you are "Inspecting the data".
+b. Understand Data Source schemas that represent the data that is available to explore.
+c. Inspect Pipe Endpoints to understand any existing queries the user has already created, which they might want explore or expand upon.
+d. If a Pipe Endpoint is not available, use the "run-select-query" tool to run queries over Data Sources.
 
 4. Pause for user input:
 a. Summarize to the user what data we have inspected.
@@ -72,11 +72,12 @@ b. Present the user with a set of multiple choices for the next steps.
 c. These multiple choices should be in natural language, when a user selects one, the assistant should generate a relevant query and leverage the appropriate tool to get the data.
 
 5. Iterate on queries:
-a. Present 1 additional multiple-choice query options to the user. Its important to not loop too many times as this is a short demo.
+a. Present 1 additional multiple-choice query options to the user.
 b. Explain the purpose of each query option.
 c. Wait for the user to select one of the query options.
 d. After each query be sure to opine on the results.
-e. Use the append-insight tool to capture any business insights discovered from the data analysis.
+e. Use the append-insight tool to save any insights discovered from the data analysis.
+f. Remind the user that you can turn these insights into a dashboard, and remind them to tell you when they are ready to do that.
 
 6. Generate a dashboard:
 a. Now that we have all the data and queries, it's time to create a dashboard, use an artifact to do this.
@@ -85,9 +86,9 @@ c. Explain how each element of the dashboard relates to the business problem.
 d. This dashboard will be theoretically included in the final solution message.
 
 7. Craft the final solution message:
-a. As you have been using the appen-insights tool the resource found at: tinybird://insights has been updated.
+a. As you have been using the append-insight tool the resource found at: tinybird://insights has been updated.
 b. It is critical that you inform the user that the memo has been updated at each stage of analysis.
-c. Ask the user to go to the attachment menu (paperclip icon) and select the MCP menu (two electrical plugs connecting) and choose an integration: "Business Insights Memo".
+c. Ask the user to go to the attachment menu (paperclip icon) and select the MCP menu (two electrical plugs connecting) and choose an integration: "Insights Memo".
 d. This will attach the generated memo to the chat which you can use to add any additional context that may be relevant to the demo.
 e. Present the final memo to the user in an artifact.
 
@@ -115,8 +116,8 @@ async def handle_list_resources() -> list[types.Resource]:
     return [
         types.Resource(
             uri=AnyUrl("tinybird://insights"),
-            name="Business Insights from Tinybird",
-            description="A living document of discovered business insights",
+            name="Insights from Tinybird",
+            description="A living document of discovered insights",
             mimeType="text/plain",
         )
     ]
@@ -161,13 +162,13 @@ async def get_prompts():
 
     prompts.append(
         dict(
-            name="tinybird-demo",
+            name="tinybird-default",
             description="A prompt to get insights from the Data Sources and Pipe Endpoints in the Tinybird Workspace",
             prompt=PROMPT_TEMPLATE,
             arguments=[
                 dict(
                     name="topic",
-                    description="Topic to get insights from the Tinybird Workspace",
+                    description="The topic of the data you want to explore",
                     required=True,
                 )
             ],
@@ -423,7 +424,7 @@ async def main():
             write_stream,
             InitializationOptions(
                 server_name="tinybird_mcp_claude",
-                server_version="0.1.1",
+                server_version="0.1.2",
                 capabilities=server.get_capabilities(
                     notification_options=NotificationOptions(),
                     experimental_capabilities={},
