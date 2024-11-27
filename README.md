@@ -12,7 +12,7 @@ The server implements an integration with a Tinybird Workspace to run analytical
 ### Prompts
 
 The server provides a single prompt:
-- tinybird-demo: Assumes you are a business analyst looking for insights in the Tinybird Workspace
+- [tinybird-demo](https://github.com/tinybirdcohttps://github.com/tinybirdco/tinybird_mcp_claude/blob/93dd9e1d3c0e33f408fe88297151a44c1dfc049c/src/tinybird_mcp_claude/server.py#L20): Assumes you are a business analyst looking for insights in the Tinybird Workspace
   - Required "topic" argument to define the business analytics memo topic
 
 You can configure additional prompt workflows:
