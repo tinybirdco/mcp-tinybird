@@ -91,6 +91,7 @@ TB_ADMIN_TOKEN=
 ```
 
 ```json
+{
   "mcpServers": {
     "tinybird_mcp_claude_local": {
       "command": "uv",
@@ -102,6 +103,7 @@ TB_ADMIN_TOKEN=
       ]
     }
   }
+}
 ```
 
 ### Building and Publishing
