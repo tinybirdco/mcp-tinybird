@@ -1,32 +1,71 @@
 # tinybird_mcp_claude MCP server
 
-A MCP server sfor Claude to interact with a Tinybird Workspace
+A MCP server for Claude to interact with a Tinybird Workspace
 
 ## Components
 
 ### Resources
 
-The server implements a simple note storage system with:
-- Custom note:// URI scheme for accessing individual notes
-- Each note resource has a name, description and text/plain mimetype
+The server implements an integration with a Tinybird Workspace to run analytical queries and get an insights memo:
+- Custom tinybird:// URI scheme for accessing memos
 
 ### Prompts
 
 The server provides a single prompt:
-- summarize-notes: Creates summaries of all stored notes
-  - Optional "style" argument to control detail level (brief/detailed)
-  - Generates prompt combining all current notes with style preference
+- tinybird-demo: Assumes you are a business analyst looking for insights in the Tinybird Workspace
+  - Required "topic" argument to define the business analytics memo topic
+
+You can configure additional prompt workflows:
+  - Create a prompts Data Source in your workspace with this schema and append your prompts. The MCP loads `prompts` on initialization so you can configure it to your needs:
+```bash
+SCHEMA >
+    `name` String `json:$.name`,
+    `description` String `json:$.description`,
+    `timestamp` DateTime `json:$.timestamp`,
+    `arguments` Array(String) `json:$.arguments[:]`,
+    `prompt` String `json:$.prompt`
+```
 
 ### Tools
 
-The server implements one tool:
-- add-note: Adds a new note to the server
-  - Takes "name" and "content" as required string arguments
-  - Updates server state and notifies clients of resource changes
+The server implements several tools to interact with the Tinybird Workspace:
+- `list-data-sources`: Lists all Data Sources in the Tinybird Workspace
+- `list-pipes`: Lists all Pipe Endpoints in the Tinybird Workspace
+- `get-data-source`: Gets the information of a Data Source given its name, including the schema.
+- `get-pipe`: Gets the information of a Pipe Endpoint given its name, including its nodes and SQL transformation to understand what insights it provides.
+- `request-pipe-data`: Requests data from a Pipe Endpoints via an HTTP request. Pipe endpoints can have parameters to filter the analytical data.
+- `run-select-query`: Allows to run a select query over a Data Source to extract insights.
+- `append-insight`: Adds a new business insight to the memo resource
+- `llms-tinybird-docs`: Contains the whole Tinybird product documentation, so you can use it to get context about what Tinybird is, what it does, API reference and more.
+- `save-event`: This allows to send an event to a Tinybird Data Source. Use it to save a user generated prompt to the prompts Data Source. The MCP server feeds from the prompts Data Source on initialization so the user can instruct the LLM the workflow to follow.
 
 ## Configuration
 
-[TODO: Add configuration details specific to your implementation]
+The MCP requires two environment variables to interact with the Tinybird Workspace.
+
+If you are working locally add two environment variables to a `.env` file in the root of the repository:
+
+```sh
+TB_API_URL=
+TB_ADMIN_TOKEN=
+```
+
+For Claude Desktop add an `env` config in your `claude_desktop_config.json`:
+
+```json
+"mcpServers": {
+    "tinybird_mcp_claude": {
+      "command": "uvx",
+      "args": [
+        "tinybird_mcp_claude"
+      ],
+      "env": {
+        "TB_API_URL": "your_tinybird_api_url",
+        "TB_ADMIN_TOKEN": "your_tinybird_workspace_admin_token"
+      }
+    }
+  }
+```
 
 ## Quickstart
 

@@ -1,7 +1,7 @@
 [project]
 name = "tinybird-mcp-claude"
 version = "0.1.0"
-description = "A MCP server sfor Claude to interact with a Tinybird Workspace"
+description = "A MCP server for Claude to interact with a Tinybird Workspace"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
