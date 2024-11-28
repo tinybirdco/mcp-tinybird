@@ -309,6 +309,23 @@ async def handle_list_tools() -> list[types.Tool]:
             },
         ),
         types.Tool(
+            name="explain-sql-query",
+            description="Use it to analyze and understand the query plan or query syntax of a Pipe or Node SQL query in Tinybird",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "pipe_name": {
+                        "type": "String",
+                        "description": "The name of the Pipe Endpoint to explain and analyze"
+                    },
+                    "node_name": {
+                        "type": "String",
+                        "description": "The name of a Pipe Endpoint Node to explain and analyze"
+                    }
+                },
+            },
+        ),
+        types.Tool(
             name="save-event",
             description="Sends an event to a Data Source in Tinybird. The data needs to be in NDJSON format and conform to the Data Source schema in Tinybird",
             inputSchema={
@@ -397,6 +414,16 @@ async def handle_call_tool(
         return [types.TextContent(type="text", text="Insight added to memo")]
     elif name == "llms-tinybird-docs":
         response = await tb_client.llms()
+        return [
+            types.TextContent(
+                type="text",
+                text=str(response),
+            )
+        ]
+    elif name == "explain-sql-query":
+        pipe_name = arguments.get("pipe_name")
+        node_name = arguments.get("node_name")
+        response = await tb_client.explain_pipe(pipe_name, node_name)
         return [
             types.TextContent(
                 type="text",

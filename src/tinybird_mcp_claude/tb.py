@@ -150,12 +150,17 @@ class APIClient:
         params = {'q': f'{query} FORMAT JSON'}
         return await self._get('v0/sql', params)
     
-    async def llms(self, query: str) -> Dict[str, Any]:
-        url = "https://www.tinybird.co/docs/llms.txt"
+    async def llms(self) -> Dict[str, Any]:
+        url = "https://www.tinybird.co/docs/llms-full.txt"
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
             response.raise_for_status()
             return response.text
+        
+    async def explain_query(self, query: str, syntax_only: bool = False) -> Dict[str, Any]:
+        explain_type = "EXPLAIN SYNTAX" if syntax_only else "EXPLAIN"
+        params = {'q': f'{explain_type} {query} FORMAT JSON'}
+        return await self._get('v0/sql', params)
         
     async def save_event(self, datasource_name: str, data: Dict[str, Any]):
         url = f'{self.client.api_url}/v0/events'
