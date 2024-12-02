@@ -1,9 +1,42 @@
 import httpx
-import json
-import os
+import logging
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
-from dotenv import load_dotenv
+from datetime import datetime
+from functools import wraps
+import traceback
+from pathlib import Path
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger('TinybirdClient')
+
+
+def log_function_call(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        start_time = datetime.now()
+        function_name = func.__name__
+        
+        # Log the function call
+        logger.info(f"Calling {function_name} with args: {args[1:]} kwargs: {kwargs}")
+        
+        try:
+            result = await func(*args, **kwargs)
+            duration = (datetime.now() - start_time).total_seconds()
+            logger.info(f"Successfully completed {function_name} in {duration:.2f}s")
+            return result
+        except Exception as e:
+            duration = (datetime.now() - start_time).total_seconds()
+            logger.error(
+                f"Exception in {function_name} after {duration:.2f}s: {str(e)}\n"
+                f"Traceback:\n{traceback.format_exc()}"
+            )
+            raise
+    return wrapper
 
 @dataclass
 class Column:
@@ -107,11 +140,25 @@ class APIClient:
         """Close the underlying HTTP client."""
         await self.client.aclose()
 
+    @log_function_call
     async def _get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         if params is None:
             params = {}
         params['token'] = self.token
+        params['__tb__client'] = "tinybird_mcp_claude"
         
+        url = f"{self.api_url}/{endpoint}"
+        response = await self.client.get(url, params=params)
+        response.raise_for_status()
+        return response.json()
+    
+    @log_function_call
+    async def _post(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if params is None:
+            params = {}
+        params['token'] = self.token
+        params['__tb__client'] = "tinybird_mcp_claude"
+
         url = f"{self.api_url}/{endpoint}"
         response = await self.client.get(url, params=params)
         response.raise_for_status()
@@ -145,26 +192,53 @@ class APIClient:
         response = await self._get(f'v0/pipes/{pipe_name}.json', params)
         return PipeData.from_dict({key: response[key] for key in ['meta', 'data'] if key in response})
 
-    async def run_select_query(self, query: str) -> Dict[str, Any]:
+    async def run_select_query(self, query: str, **kwargs: Any) -> Dict[str, Any]:
         """Run a SQL SELECT query."""
-        params = {'q': f'{query} FORMAT JSON'}
+        kwargs = kwargs or {}
+        params = {'q': f'{query} FORMAT JSON', **kwargs}
         return await self._get('v0/sql', params)
     
     async def llms(self, query: str) -> Dict[str, Any]:
-        url = "https://www.tinybird.co/docs/llms.txt"
+        url = "https://www.tinybird.co/docs/llms-full.txt"
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
             response.raise_for_status()
             return response.text
+
+    async def explain(self, pipe_name: str) -> Dict[str, Any]:
+        endpoint = f'v0/pipes/{pipe_name}/explain'
+        return await self._get(endpoint)
         
-    async def save_event(self, datasource_name: str, data: Dict[str, Any]):
-        url = f'{self.client.api_url}/v0/events'
+    async def save_event(self, datasource_name: str, data: str):
+        url = f'{self.api_url}/v0/events'
         params = {
             'name': datasource_name,
-            'token': self.client.token
+            'token': self.token
         }
 
-        response = await self.client.post(url, params=params, data=data)
+        try:
+            response = await self.client.post(url, params=params, data=data)
+            response.raise_for_status()
+            return response.text
+        except Exception as e:
+            raise ValueError(str(e))
+
+    async def push_datafile(self, files: str):
+        url = f'{self.api_url}/v0/datafiles'
+
+        file_path = Path(files)
+
+        files_dict = {
+            file_path.name: (file_path.name, file_path.open('rb'), 'application/octet-stream')
+        }
+
+        params = {
+            'filenames': file_path.name,
+            'force': "True",
+            'dry_run': "False",
+            'token': self.token
+        }
+
+        response = await self.client.post(url, params=params, files=files_dict)
         response.raise_for_status()
         return response.text
-
