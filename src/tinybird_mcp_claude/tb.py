@@ -1,9 +1,41 @@
 import httpx
-import json
-import os
+import logging
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
-from dotenv import load_dotenv
+from datetime import datetime
+from functools import wraps
+import traceback
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger('TinybirdClient')
+
+
+def log_function_call(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        start_time = datetime.now()
+        function_name = func.__name__
+        
+        # Log the function call
+        logger.info(f"Calling {function_name} with args: {args[1:]} kwargs: {kwargs}")
+        
+        try:
+            result = await func(*args, **kwargs)
+            duration = (datetime.now() - start_time).total_seconds()
+            logger.info(f"Successfully completed {function_name} in {duration:.2f}s")
+            return result
+        except Exception as e:
+            duration = (datetime.now() - start_time).total_seconds()
+            logger.error(
+                f"Exception in {function_name} after {duration:.2f}s: {str(e)}\n"
+                f"Traceback:\n{traceback.format_exc()}"
+            )
+            raise
+    return wrapper
 
 @dataclass
 class Column:
@@ -107,7 +139,9 @@ class APIClient:
         """Close the underlying HTTP client."""
         await self.client.aclose()
 
+    @log_function_call
     async def _get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        logging.warning("TESSSST")
         if params is None:
             params = {}
         params['token'] = self.token
@@ -157,11 +191,11 @@ class APIClient:
             response.raise_for_status()
             return response.text
         
-    async def save_event(self, datasource_name: str, data: Dict[str, Any]):
-        url = f'{self.client.api_url}/v0/events'
+    async def save_event(self, datasource_name: str, data: str):
+        url = f'{self.api_url}/v0/events'
         params = {
             'name': datasource_name,
-            'token': self.client.token
+            'token': self.token
         }
 
         response = await self.client.post(url, params=params, data=data)

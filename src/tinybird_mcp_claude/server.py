@@ -139,26 +139,26 @@ async def handle_read_resource(uri: AnyUrl) -> str:
 
 async def get_prompts():
     prompts = []
-    try:
-        response = await tb_client.run_select_query("SELECT * FROM prompts ORDER BY name, timestamp DESC LIMIT 1 by timestamp, name")
-        if response.get("data"):
-            for prompt in response.get("data"):
-                prompts.append(
-                    dict(
-                        name=prompt.get("name"),
-                        description=prompt.get("description"),
-                        prompt=prompt.get("prompt"),
-                        arguments=[
-                            dict(
-                                name=argument,
-                                description=argument,
-                                required=True,
-                            )
-                        for argument in prompt.get("arguments")]
-                    )
-                )
-    except Exception as e:
-        logging.error(f"error listing prompts: {e}")
+    # try:
+    #     response = await tb_client.run_select_query("SELECT * FROM prompts ORDER BY name, timestamp DESC LIMIT 1 by timestamp, name")
+    #     if response.get("data"):
+    #         for prompt in response.get("data"):
+    #             prompts.append(
+    #                 dict(
+    #                     name=prompt.get("name"),
+    #                     description=prompt.get("description"),
+    #                     prompt=prompt.get("prompt"),
+    #                     arguments=[
+    #                         dict(
+    #                             name=argument,
+    #                             description=argument,
+    #                             required=True,
+    #                         )
+    #                     for argument in prompt.get("arguments")]
+    #                 )
+    #             )
+    # except Exception as e:
+    #     logging.error(f"error listing prompts: {e}")
 
     prompts.append(
         dict(
@@ -315,11 +315,11 @@ async def handle_list_tools() -> list[types.Tool]:
                 "type": "object",
                 "properties": {
                     "datasource_name": {
-                        "type": "String",
+                        "type": "string",
                         "description": "The name of the Data Source in Tinybird"
                     },
                     "data": {
-                        "type": "String",
+                        "type": "string",
                         "description": "A JSON object that will be converted to a NDJSON String to save in the Tinybird Data Source via the events API. It should contain one key for each column in the Data Source"
                     }
                 },
