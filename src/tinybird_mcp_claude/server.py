@@ -309,20 +309,25 @@ async def handle_list_tools() -> list[types.Tool]:
             },
         ),
         types.Tool(
-            name="explain-sql-query",
-            description="Use it to analyze and understand the query plan or query syntax of a Pipe or Node SQL query in Tinybird",
+            name="analyze-pipe",
+            description="Analyze the Pipe Endpoint SQL",
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "pipe_name": {
-                        "type": "String",
-                        "description": "The name of the Pipe Endpoint to explain and analyze"
-                    },
-                    "node_name": {
-                        "type": "String",
-                        "description": "The name of a Pipe Endpoint Node to explain and analyze"
-                    }
+                    "pipe_name": {"type": "string", "description": "The Pipe Endpoint name"},
                 },
+                "required": ["pipe_name"],
+            },
+        ),
+        types.Tool(
+            name="push-datafile",
+            description="Push a .datasource or .pipe file to the Workspace",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "files": {"type": "string", "description": "The datafile local path"},
+                },
+                "required": ["files"],
             },
         ),
         types.Tool(
@@ -420,10 +425,8 @@ async def handle_call_tool(
                 text=str(response),
             )
         ]
-    elif name == "explain-sql-query":
-        pipe_name = arguments.get("pipe_name")
-        node_name = arguments.get("node_name")
-        response = await tb_client.explain_pipe(pipe_name, node_name)
+    elif name == "analyze-pipe":
+        response = await tb_client.explain(arguments.get("pipe_name"))
         return [
             types.TextContent(
                 type="text",
@@ -434,6 +437,15 @@ async def handle_call_tool(
         datasource_name = arguments.get("datasource_name")
         data = arguments.get("data")
         response = await tb_client.save_event(datasource_name, data)
+        return [
+            types.TextContent(
+                type="text",
+                text=str(response),
+            )
+        ]
+    elif name == "push-datafile":
+        files = arguments.get("files")
+        response = await tb_client.push_datafile(files)
         return [
             types.TextContent(
                 type="text",
