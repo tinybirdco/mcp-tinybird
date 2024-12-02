@@ -309,6 +309,28 @@ async def handle_list_tools() -> list[types.Tool]:
             },
         ),
         types.Tool(
+            name="analyze-pipe",
+            description="Analyze the Pipe Endpoint SQL",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "pipe_name": {"type": "string", "description": "The Pipe Endpoint name"},
+                },
+                "required": ["pipe_name"],
+            },
+        ),
+        types.Tool(
+            name="push-datafile",
+            description="Push a .datasource or .pipe file to the Workspace",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "files": {"type": "string", "description": "The datafile local path"},
+                },
+                "required": ["files"],
+            },
+        ),
+        types.Tool(
             name="save-event",
             description="Sends an event to a Data Source in Tinybird. The data needs to be in NDJSON format and conform to the Data Source schema in Tinybird",
             inputSchema={
@@ -397,6 +419,23 @@ async def handle_call_tool(
         return [types.TextContent(type="text", text="Insight added to memo")]
     elif name == "llms-tinybird-docs":
         response = await tb_client.llms()
+        return [
+            types.TextContent(
+                type="text",
+                text=str(response),
+            )
+        ]
+    elif name == "analyze-pipe":
+        response = await tb_client.explain(arguments.get("pipe_name"))
+        return [
+            types.TextContent(
+                type="text",
+                text=str(response),
+            )
+        ]
+    elif name == "push-datafile":
+        files = arguments.get("files")
+        response = await tb_client.push_datafile(files)
         return [
             types.TextContent(
                 type="text",
