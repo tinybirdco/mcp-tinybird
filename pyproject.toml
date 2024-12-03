@@ -18,7 +18,7 @@ requires = [ "hatchling",]
 build-backend = "hatchling.build"
 
 [project.scripts]
-mcp-tinybird = "mcp-tinybird:main"
+mcp-tinybird = "mcp_tinybird:main"
 
 [project.urls]
 homepage = "https://github.com/tinybirdco/mcp-tinybird"
