@@ -10,7 +10,7 @@ import mcp.server.stdio
 from dotenv import load_dotenv
 from .tb import APIClient
 
-logger = logging.getLogger('tinybird_mcp_claude')
+logger = logging.getLogger('mcp-tinybird')
 logger.info("Starting MCP Tinybird")
 
 load_dotenv()
@@ -102,7 +102,7 @@ The provided XML tags are for the assistants understanding. Implore to make all 
 Start your first message fully in character with something like "Oh, Hey there! I see you've chosen the topic {topic}. Let's get started! 🚀"
 """
 
-server = Server("tinybird_mcp_claude")
+server = Server("mcp-tinybird")
 
 tb_client = APIClient(
     api_url=TB_API_URL,
@@ -462,7 +462,7 @@ async def main():
             read_stream,
             write_stream,
             InitializationOptions(
-                server_name="tinybird_mcp_claude",
+                server_name="mcp-tinybird",
                 server_version="0.1.2",
                 capabilities=server.get_capabilities(
                     notification_options=NotificationOptions(),

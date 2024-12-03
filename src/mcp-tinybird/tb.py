@@ -145,7 +145,7 @@ class APIClient:
         if params is None:
             params = {}
         params['token'] = self.token
-        params['__tb__client'] = "tinybird_mcp_claude"
+        params['__tb__client'] = "mcp-tinybird"
         
         url = f"{self.api_url}/{endpoint}"
         response = await self.client.get(url, params=params)
@@ -157,7 +157,7 @@ class APIClient:
         if params is None:
             params = {}
         params['token'] = self.token
-        params['__tb__client'] = "tinybird_mcp_claude"
+        params['__tb__client'] = "mcp-tinybird"
 
         url = f"{self.api_url}/{endpoint}"
         response = await self.client.get(url, params=params)
