@@ -1,5 +1,5 @@
 [project]
-name = "tinybird-mcp"
+name = "mcp-tinybird"
 version = "0.1.3"
 description = "An MCP server to interact with a Tinybird Workspace from any MCP client."
 readme = "README.md"
