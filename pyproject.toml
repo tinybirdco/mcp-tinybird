@@ -1,6 +1,6 @@
 [project]
 name = "mcp-tinybird"
-version = "0.1.3"
+version = "0.1.4"
 description = "An MCP server to interact with a Tinybird Workspace from any MCP client."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -8,6 +8,7 @@ dependencies = [
  "httpx>=0.27.2",
  "mcp>=1.0.0",
  "python-dotenv>=1.0.1",
+ "tinybird-python-sdk>=0.1.2",
 ]
 [[project.authors]]
 name = "alrocar"
@@ -22,3 +23,14 @@ mcp-tinybird = "mcp_tinybird:main"
 
 [project.urls]
 homepage = "https://github.com/tinybirdco/mcp-tinybird"
+
+[project.optional-dependencies]
+dev = [
+    "black>=23.12.1",
+    "pyproject-toml>=0.0.10",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py37']
+include = '\.pyi?$'

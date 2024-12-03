@@ -9,10 +9,9 @@ from pathlib import Path
 
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-logger = logging.getLogger('TinybirdClient')
+logger = logging.getLogger("TinybirdClient")
 
 
 def log_function_call(func):
@@ -20,10 +19,10 @@ def log_function_call(func):
     async def wrapper(*args, **kwargs):
         start_time = datetime.now()
         function_name = func.__name__
-        
+
         # Log the function call
         logger.info(f"Calling {function_name} with args: {args[1:]} kwargs: {kwargs}")
-        
+
         try:
             result = await func(*args, **kwargs)
             duration = (datetime.now() - start_time).total_seconds()
@@ -36,7 +35,9 @@ def log_function_call(func):
                 f"Traceback:\n{traceback.format_exc()}"
             )
             raise
+
     return wrapper
+
 
 @dataclass
 class Column:
@@ -48,12 +49,14 @@ class Column:
     nullable: bool
     normalized_name: str
 
+
 @dataclass
 class Engine:
     engine: str
     engine_sorting_key: str
     engine_partition_key: str
     engine_primary_key: Optional[str]
+
 
 @dataclass
 class DataSource:
@@ -66,18 +69,19 @@ class DataSource:
     quarantine_rows: int
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'DataSource':
-        engine = Engine(**data['engine'])
-        columns = [Column(**col) for col in data['columns']]
+    def from_dict(cls, data: Dict[str, Any]) -> "DataSource":
+        engine = Engine(**data["engine"])
+        columns = [Column(**col) for col in data["columns"]]
         return cls(
-            id=data['id'],
-            name=data['name'],
+            id=data["id"],
+            name=data["name"],
             engine=engine,
             columns=columns,
-            indexes=data['indexes'],
-            new_columns_detected=data['new_columns_detected'],
-            quarantine_rows=data['quarantine_rows']
+            indexes=data["indexes"],
+            new_columns_detected=data["new_columns_detected"],
+            quarantine_rows=data["quarantine_rows"],
         )
+
 
 @dataclass
 class Pipe:
@@ -89,8 +93,9 @@ class Pipe:
     url: str
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Pipe':
+    def from_dict(cls, data: Dict[str, Any]) -> "Pipe":
         return cls(**data)
+
 
 @dataclass
 class PipeData:
@@ -98,19 +103,17 @@ class PipeData:
     data: List[Dict[str, Any]]
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'PipeData':
+    def from_dict(cls, data: Dict[str, Any]) -> "PipeData":
         return cls(**data)
+
 
 class APIClient:
     def __init__(self, api_url: str, token: str):
-        self.api_url = api_url.rstrip('/')
+        self.api_url = api_url.rstrip("/")
         self.token = token
         self.client = httpx.AsyncClient(
             timeout=30.0,
-            headers={
-                "Accept": "application/json",
-                "User-Agent": "Python/APIClient"
-            }
+            headers={"Accept": "application/json", "User-Agent": "Python/APIClient"},
         )
         self.insights: list[str] = []
 
@@ -141,23 +144,27 @@ class APIClient:
         await self.client.aclose()
 
     @log_function_call
-    async def _get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _get(
+        self, endpoint: str, params: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         if params is None:
             params = {}
-        params['token'] = self.token
-        params['__tb__client'] = "mcp-tinybird"
-        
+        params["token"] = self.token
+        params["__tb__client"] = "mcp-tinybird"
+
         url = f"{self.api_url}/{endpoint}"
         response = await self.client.get(url, params=params)
         response.raise_for_status()
         return response.json()
-    
+
     @log_function_call
-    async def _post(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _post(
+        self, endpoint: str, params: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         if params is None:
             params = {}
-        params['token'] = self.token
-        params['__tb__client'] = "mcp-tinybird"
+        params["token"] = self.token
+        params["__tb__client"] = "mcp-tinybird"
 
         url = f"{self.api_url}/{endpoint}"
         response = await self.client.get(url, params=params)
@@ -166,38 +173,40 @@ class APIClient:
 
     async def list_data_sources(self) -> List[DataSource]:
         """List all available data sources."""
-        params = {'attrs': 'id,name,description,columns'}
-        response = await self._get('v0/datasources', params)
-        return [DataSource.from_dict(ds) for ds in response['datasources']]
+        params = {"attrs": "id,name,description,columns"}
+        response = await self._get("v0/datasources", params)
+        return [DataSource.from_dict(ds) for ds in response["datasources"]]
 
     async def get_data_source(self, datasource_id: str) -> Dict[str, Any]:
         """Get detailed information about a specific data source."""
         params = {
-            'attrs': 'columns',
+            "attrs": "columns",
         }
-        return await self._get(f'v0/datasources/{datasource_id}', params)
+        return await self._get(f"v0/datasources/{datasource_id}", params)
 
     async def list_pipes(self) -> List[Pipe]:
         """List all available pipes."""
-        params = {'attrs': 'id,name,description,type,endpoint'}
-        response = await self._get('v0/pipes', params)
-        return [Pipe.from_dict(pipe) for pipe in response['pipes']]
+        params = {"attrs": "id,name,description,type,endpoint"}
+        response = await self._get("v0/pipes", params)
+        return [Pipe.from_dict(pipe) for pipe in response["pipes"]]
 
     async def get_pipe(self, pipe_name: str) -> Dict[str, Any]:
         """Get detailed information about a specific pipe."""
-        return await self._get(f'v0/pipes/{pipe_name}')
+        return await self._get(f"v0/pipes/{pipe_name}")
 
     async def get_pipe_data(self, pipe_name: str, **params) -> PipeData:
         """Get data from a pipe with optional parameters."""
-        response = await self._get(f'v0/pipes/{pipe_name}.json', params)
-        return PipeData.from_dict({key: response[key] for key in ['meta', 'data'] if key in response})
+        response = await self._get(f"v0/pipes/{pipe_name}.json", params)
+        return PipeData.from_dict(
+            {key: response[key] for key in ["meta", "data"] if key in response}
+        )
 
     async def run_select_query(self, query: str, **kwargs: Any) -> Dict[str, Any]:
         """Run a SQL SELECT query."""
         kwargs = kwargs or {}
-        params = {'q': f'{query} FORMAT JSON', **kwargs}
-        return await self._get('v0/sql', params)
-    
+        params = {"q": f"{query} FORMAT JSON", **kwargs}
+        return await self._get("v0/sql", params)
+
     async def llms(self, query: str) -> Dict[str, Any]:
         url = "https://www.tinybird.co/docs/llms-full.txt"
         async with httpx.AsyncClient() as client:
@@ -206,15 +215,12 @@ class APIClient:
             return response.text
 
     async def explain(self, pipe_name: str) -> Dict[str, Any]:
-        endpoint = f'v0/pipes/{pipe_name}/explain'
+        endpoint = f"v0/pipes/{pipe_name}/explain"
         return await self._get(endpoint)
-        
+
     async def save_event(self, datasource_name: str, data: str):
-        url = f'{self.api_url}/v0/events'
-        params = {
-            'name': datasource_name,
-            'token': self.token
-        }
+        url = f"{self.api_url}/v0/events"
+        params = {"name": datasource_name, "token": self.token}
 
         try:
             response = await self.client.post(url, params=params, data=data)
@@ -224,19 +230,23 @@ class APIClient:
             raise ValueError(str(e))
 
     async def push_datafile(self, files: str):
-        url = f'{self.api_url}/v0/datafiles'
+        url = f"{self.api_url}/v0/datafiles"
 
         file_path = Path(files)
 
         files_dict = {
-            file_path.name: (file_path.name, file_path.open('rb'), 'application/octet-stream')
+            file_path.name: (
+                file_path.name,
+                file_path.open("rb"),
+                "application/octet-stream",
+            )
         }
 
         params = {
-            'filenames': file_path.name,
-            'force': "True",
-            'dry_run': "False",
-            'token': self.token
+            "filenames": file_path.name,
+            "force": "True",
+            "dry_run": "False",
+            "token": self.token,
         }
 
         response = await self.client.post(url, params=params, files=files_dict)

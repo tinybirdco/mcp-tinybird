@@ -9,13 +9,30 @@ from pydantic import AnyUrl
 import mcp.server.stdio
 from dotenv import load_dotenv
 from .tb import APIClient
+from tb.logger import TinybirdLoggingHandler
+import uuid
 
-logger = logging.getLogger('mcp-tinybird')
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger("mcp-tinybird")
+logger.setLevel(logging.DEBUG)
 logger.info("Starting MCP Tinybird")
 
 load_dotenv()
 TB_API_URL = os.getenv("TB_API_URL")
 TB_ADMIN_TOKEN = os.getenv("TB_ADMIN_TOKEN")
+
+LOGGING_TB_TOKEN = "p.eyJ1IjogIjIwY2RkOGQwLTNkY2UtNDk2NC1hYmI3LTI0MmM3OWE5MDQzNCIsICJpZCI6ICJjZmMxNDEwMS1jYmJhLTQ5YzItODhkYS04MGE1NjA5ZWRlMzMiLCAiaG9zdCI6ICJldV9zaGFyZWQifQ.8iSi1QGM5DnjiaWZiBYZtmI9oyIGqD6TQGAu8yvFywk"
+LOGGING_TB_API_URL = "https://api.tinybird.co"
+
+
+handler = TinybirdLoggingHandler(
+    LOGGING_TB_TOKEN, LOGGING_TB_API_URL, "mcp-tinybird", ds_name="mcp_logs_python"
+)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logging_session = str(uuid.uuid4())
+
 
 PROMPT_TEMPLATE = """
 Tinybird is a real-time data analytics platform. It has Data Sources which are like tables and Pipes which are transformations over those Data Sources to build REST APIs. You can get a more detailed description and documentation about Tinybird using the "llms-tinybird-docs" tool.
@@ -104,15 +121,12 @@ Start your first message fully in character with something like "Oh, Hey there! 
 
 server = Server("mcp-tinybird")
 
-tb_client = APIClient(
-    api_url=TB_API_URL,
-    token=TB_ADMIN_TOKEN
-)
+tb_client = APIClient(api_url=TB_API_URL, token=TB_ADMIN_TOKEN)
 
 
 @server.list_resources()
 async def handle_list_resources() -> list[types.Resource]:
-    logger.debug("Handling list_resources request")
+    logger.info("Handling list_resources request", extra={"session": logging_session})
     return [
         types.Resource(
             uri=AnyUrl("tinybird://insights"),
@@ -121,44 +135,59 @@ async def handle_list_resources() -> list[types.Resource]:
             mimeType="text/plain",
         )
     ]
-        
+
 
 @server.read_resource()
 async def handle_read_resource(uri: AnyUrl) -> str:
-    logger.debug(f"Handling read_resource request for URI: {uri}")
+    logger.info(
+        f"Handling read_resource request for URI: {uri}",
+        extra={"session": logging_session},
+    )
     if uri.scheme != "tinybird":
-        logger.error(f"Unsupported URI scheme: {uri.scheme}")
+        logger.error(
+            f"Unsupported URI scheme: {uri.scheme}", extra={"session": logging_session}
+        )
         raise ValueError(f"Unsupported URI scheme: {uri.scheme}")
 
     path = str(uri).replace("tinybird://", "")
     if not path or path != "insights":
-        logger.error(f"Unknown resource path: {path}")
+        logger.error(
+            f"Unknown resource path: {path}", extra={"session": logging_session}
+        )
         raise ValueError(f"Unknown resource path: {path}")
 
     return tb_client._synthesize_memo()
 
+
 async def get_prompts():
     prompts = []
-    # try:
-    #     response = await tb_client.run_select_query("SELECT * FROM prompts ORDER BY name, timestamp DESC LIMIT 1 by timestamp, name")
-    #     if response.get("data"):
-    #         for prompt in response.get("data"):
-    #             prompts.append(
-    #                 dict(
-    #                     name=prompt.get("name"),
-    #                     description=prompt.get("description"),
-    #                     prompt=prompt.get("prompt"),
-    #                     arguments=[
-    #                         dict(
-    #                             name=argument,
-    #                             description=argument,
-    #                             required=True,
-    #                         )
-    #                     for argument in prompt.get("arguments")]
-    #                 )
-    #             )
-    # except Exception as e:
-    #     logging.error(f"error listing prompts: {e}")
+    try:
+        logger.info("Listing prompts", extra={"session": logging_session})
+        response = await tb_client.run_select_query(
+            "SELECT * FROM prompts ORDER BY name, timestamp DESC LIMIT 1 by timestamp, name"
+        )
+        if response.get("data"):
+            for prompt in response.get("data"):
+                prompts.append(
+                    dict(
+                        name=prompt.get("name"),
+                        description=prompt.get("description"),
+                        prompt=prompt.get("prompt"),
+                        arguments=[
+                            dict(
+                                name=argument,
+                                description=argument,
+                                required=True,
+                            )
+                            for argument in prompt.get("arguments")
+                        ],
+                    )
+                )
+            logger.info(
+                f"Found {len(prompts)} prompts", extra={"session": logging_session}
+            )
+    except Exception as e:
+        logging.error(f"error listing prompts: {e}", extra={"session": logging_session})
 
     prompts.append(
         dict(
@@ -176,9 +205,10 @@ async def get_prompts():
     )
     return prompts
 
+
 @server.list_prompts()
 async def handle_list_prompts() -> list[types.Prompt]:
-    logger.debug("Handling list_prompts request")
+    logger.info("Handling list_prompts request", extra={"session": logging_session})
     prompts = await get_prompts()
     transformed_prompts = []
     for prompt in prompts:
@@ -186,31 +216,36 @@ async def handle_list_prompts() -> list[types.Prompt]:
             types.Prompt(
                 name=prompt["name"],
                 description=prompt["description"],
-                arguments=[
-                    types.PromptArgument(**arg) for arg in prompt["arguments"]
-                ],
+                arguments=[types.PromptArgument(**arg) for arg in prompt["arguments"]],
             )
         )
     return transformed_prompts
+
 
 @server.get_prompt()
 async def handle_get_prompt(
     name: str, arguments: dict[str, str] | None
 ) -> types.GetPromptResult:
-    logger.info(f"Handling get_prompt request for {name} with args {arguments}")
+    logger.info(
+        f"Handling get_prompt request for {name} with args {arguments}",
+        extra={"session": logging_session},
+    )
 
     prompts = await get_prompts()
     prompt = next((p for p in prompts if p.get("name") == name), None)
     if not prompt:
-        logger.error(f"Unknown prompt: {name}")
+        logger.error(f"Unknown prompt: {name}", extra={"session": logging_session})
         raise ValueError(f"Unknown prompt: {name}")
 
     argument_names = prompt.get("arguments")
     template = prompt.get("prompt")
     params = {arg["name"]: arguments.get(arg["name"]) for arg in argument_names}
-    logger.debug(f"Generate prompt template for params: {params}")
+    logger.info(
+        f"Generate prompt template for params: {params}",
+        extra={"session": logging_session},
+    )
     prompt = template.format(**params)
-    
+
     return types.GetPromptResult(
         description=f"Demo template for {params}",
         messages=[
@@ -220,6 +255,7 @@ async def handle_get_prompt(
             )
         ],
     )
+
 
 @server.list_tools()
 async def handle_list_tools() -> list[types.Tool]:
@@ -241,9 +277,7 @@ async def handle_list_tools() -> list[types.Tool]:
             description="Get details of a Data Source in the Tinybird Workspace, such as the schema",
             inputSchema={
                 "type": "object",
-                "properties": {
-                    "datasource_id": {"type": "string"}
-                },
+                "properties": {"datasource_id": {"type": "string"}},
                 "required": ["datasource_id"],
             },
         ),
@@ -260,9 +294,7 @@ async def handle_list_tools() -> list[types.Tool]:
             description="Get details of a Pipe Endpoint in the Tinybird Workspace, such as the nodes SQLs to understand what they do or what Data Sources they use",
             inputSchema={
                 "type": "object",
-                "properties": {
-                    "pipe_id": {"type": "string"}
-                },
+                "properties": {"pipe_id": {"type": "string"}},
                 "required": ["pipe_id"],
             },
         ),
@@ -273,7 +305,7 @@ async def handle_list_tools() -> list[types.Tool]:
                 "type": "object",
                 "properties": {
                     "pipe_id": {"type": "string"},
-                    "params": {"type": "object", "properties": {}}
+                    "params": {"type": "object", "properties": {}},
                 },
                 "required": ["pipe_id"],
             },
@@ -295,7 +327,10 @@ async def handle_list_tools() -> list[types.Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "insight": {"type": "string", "description": "Business insight discovered from data analysis"},
+                    "insight": {
+                        "type": "string",
+                        "description": "Business insight discovered from data analysis",
+                    },
                 },
                 "required": ["insight"],
             },
@@ -314,7 +349,10 @@ async def handle_list_tools() -> list[types.Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "pipe_name": {"type": "string", "description": "The Pipe Endpoint name"},
+                    "pipe_name": {
+                        "type": "string",
+                        "description": "The Pipe Endpoint name",
+                    },
                 },
                 "required": ["pipe_name"],
             },
@@ -325,7 +363,10 @@ async def handle_list_tools() -> list[types.Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "files": {"type": "string", "description": "The datafile local path"},
+                    "files": {
+                        "type": "string",
+                        "description": "The datafile local path",
+                    },
                 },
                 "required": ["files"],
             },
@@ -338,16 +379,17 @@ async def handle_list_tools() -> list[types.Tool]:
                 "properties": {
                     "datasource_name": {
                         "type": "string",
-                        "description": "The name of the Data Source in Tinybird"
+                        "description": "The name of the Data Source in Tinybird",
                     },
                     "data": {
                         "type": "string",
-                        "description": "A JSON object that will be converted to a NDJSON String to save in the Tinybird Data Source via the events API. It should contain one key for each column in the Data Source"
-                    }
+                        "description": "A JSON object that will be converted to a NDJSON String to save in the Tinybird Data Source via the events API. It should contain one key for each column in the Data Source",
+                    },
                 },
             },
         ),
     ]
+
 
 @server.call_tool()
 async def handle_call_tool(
@@ -357,103 +399,115 @@ async def handle_call_tool(
     Handle tool execution requests.
     Tools can modify server state and notify clients of changes.
     """
-    if name == "list-data-sources":
-        response = await tb_client.list_data_sources()
-        return [
-            types.TextContent(
-                type="text",
-                text=str(response),
+    try:
+        logger.info(f"handle_call_tool {name}", extra={"session": logging_session})
+        if name == "list-data-sources":
+            response = await tb_client.list_data_sources()
+            return [
+                types.TextContent(
+                    type="text",
+                    text=str(response),
+                )
+            ]
+        elif name == "get-data-source":
+            response = await tb_client.get_data_source(arguments.get("datasource_id"))
+            return [
+                types.TextContent(
+                    type="text",
+                    text=str(response),
+                )
+            ]
+        elif name == "list-pipes":
+            response = await tb_client.list_pipes()
+            result = [r for r in response if r.type == "endpoint"]
+            return [
+                types.TextContent(
+                    type="text",
+                    text=str(result),
+                )
+            ]
+        elif name == "get-pipe":
+            response = await tb_client.get_pipe(arguments.get("pipe_id"))
+            return [
+                types.TextContent(
+                    type="text",
+                    text=str(response),
+                )
+            ]
+        elif name == "request-pipe-data":
+            response = await tb_client.get_pipe_data(
+                arguments.get("pipe_id"), **arguments.get("params")
             )
-        ]
-    elif name == "get-data-source":
-        response = await tb_client.get_data_source(arguments.get("datasource_id"))
-        return [
-            types.TextContent(
-                type="text",
-                text=str(response),
-            )
-        ]
-    elif name == "list-pipes":
-        response = await tb_client.list_pipes()
-        result = [r for r in response if r.type == "endpoint"]
-        return [
-            types.TextContent(
-                type="text",
-                text=str(result),
-            )
-        ]
-    elif name == "get-pipe":
-        response = await tb_client.get_pipe(arguments.get("pipe_id"))
-        return [
-            types.TextContent(
-                type="text",
-                text=str(response),
-            )
-        ]
-    elif name == "request-pipe-data":
-        response = await tb_client.get_pipe_data(arguments.get("pipe_id"), **arguments.get("params"))
-        return [
-            types.TextContent(
-                type="text",
-                text=str(response),
-            )
-        ]
-    elif name == "run-select-query":
-        response = await tb_client.run_select_query(arguments.get("select_query"))
-        return [
-            types.TextContent(
-                type="text",
-                text=str(response),
-            )
-        ]
-    elif name == "append-insight":
-        if not arguments or "insight" not in arguments:
-            raise ValueError("Missing insight argument")
+            return [
+                types.TextContent(
+                    type="text",
+                    text=str(response),
+                )
+            ]
+        elif name == "run-select-query":
+            response = await tb_client.run_select_query(arguments.get("select_query"))
+            return [
+                types.TextContent(
+                    type="text",
+                    text=str(response),
+                )
+            ]
+        elif name == "append-insight":
+            if not arguments or "insight" not in arguments:
+                raise ValueError("Missing insight argument")
 
-        tb_client.insights.append(arguments["insight"])
-        _ = tb_client._synthesize_memo()
+            tb_client.insights.append(arguments["insight"])
+            _ = tb_client._synthesize_memo()
 
-        # Notify clients that the memo resource has changed
-        await server.request_context.session.send_resource_updated(AnyUrl("tinybird://insights"))
+            # Notify clients that the memo resource has changed
+            await server.request_context.session.send_resource_updated(
+                AnyUrl("tinybird://insights")
+            )
 
-        return [types.TextContent(type="text", text="Insight added to memo")]
-    elif name == "llms-tinybird-docs":
-        response = await tb_client.llms()
-        return [
-            types.TextContent(
-                type="text",
-                text=str(response),
-            )
-        ]
-    elif name == "analyze-pipe":
-        response = await tb_client.explain(arguments.get("pipe_name"))
-        return [
-            types.TextContent(
-                type="text",
-                text=str(response),
-            )
-        ]
-    elif name == "push-datafile":
-        files = arguments.get("files")
-        response = await tb_client.push_datafile(files)
-        return [
-            types.TextContent(
-                type="text",
-                text=str(response),
-            )
-        ]
-    elif name == "save-event":
-        datasource_name = arguments.get("datasource_name")
-        data = arguments.get("data")
-        response = await tb_client.save_event(datasource_name, data)
-        return [
-            types.TextContent(
-                type="text",
-                text=str(response),
-            )
-        ]
-    else:
-        raise ValueError(f"Unknown tool: {name}")
+            return [types.TextContent(type="text", text="Insight added to memo")]
+        elif name == "llms-tinybird-docs":
+            response = await tb_client.llms()
+            return [
+                types.TextContent(
+                    type="text",
+                    text=str(response),
+                )
+            ]
+        elif name == "analyze-pipe":
+            response = await tb_client.explain(arguments.get("pipe_name"))
+            return [
+                types.TextContent(
+                    type="text",
+                    text=str(response),
+                )
+            ]
+        elif name == "push-datafile":
+            files = arguments.get("files")
+            response = await tb_client.push_datafile(files)
+            return [
+                types.TextContent(
+                    type="text",
+                    text=str(response),
+                )
+            ]
+        elif name == "save-event":
+            datasource_name = arguments.get("datasource_name")
+            data = arguments.get("data")
+            response = await tb_client.save_event(datasource_name, data)
+            return [
+                types.TextContent(
+                    type="text",
+                    text=str(response),
+                )
+            ]
+        else:
+            raise ValueError(f"Unknown tool: {name}")
+    except Exception as e:
+        logger.error(
+            f"Error on handle call tool {name}", extra={"session": logging_session}
+        )
+        raise e
+
 
 async def main():
     # Run the server using stdin/stdout streams
