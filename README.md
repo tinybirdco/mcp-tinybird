@@ -8,6 +8,11 @@ An MCP server to interact with a Tinybird Workspace from any MCP client.
 - Get the result of existing Tinybird API Endpoints with HTTP requests
 - Push Datafiles
 
+## Usage examples
+
+- [Bluesky metrics](https://bsky.app/profile/alasdairb.com/post/3lbx2mq5urk22) ([Claude transcript](https://www.tinybird.co/blog-posts/claude-analyze-bluesky-data-tinybird-mcp-server))
+- [Web analytics starter kit metrics](https://github.com/tinybirdco/web-analytics-starter-kit) ([video](https://x.com/alrocar/status/1861849648882688341)]
+
 ## Setup
 
 ### Prerequisites
