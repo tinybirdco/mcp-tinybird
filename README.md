@@ -37,7 +37,7 @@ Paste this template in the file and replace `<TINYBIRD_API_URL>` and `<TINYBIRD_
         "mcp-tinybird": {
             "command": "uvx",
             "args": [
-                "tinybird-mcp"
+                "mcp-tinybird"
             ],
             "env": {
                 "TB_API_URL": "<TINYBIRD_API_URL>",
@@ -103,7 +103,7 @@ TB_ADMIN_TOKEN=
         "--directory",
         "/Users/alrocar/gr/mcp-tinybird",
         "run",
-        "tinybird-mcp"
+        "mcp-tinybird"
       ]
     }
   }
@@ -144,7 +144,7 @@ experience, we strongly recommend using the [MCP Inspector](https://github.com/m
 You can launch the MCP Inspector via [`npm`](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) with this command:
 
 ```bash
-npx @modelcontextprotocol/inspector uv --directory /Users/alrocar/gr/mcp-tinybird run tinybird-mcp
+npx @modelcontextprotocol/inspector uv --directory /Users/alrocar/gr/mcp-tinybird run mcp-tinybird
 ```
 
 Upon launching, the Inspector will display a URL that you can access in your browser to begin debugging.

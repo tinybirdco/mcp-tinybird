@@ -271,7 +271,7 @@ wheels = [
 ]
 
 [[package]]
-name = "tinybird-mcp"
+name = "mcp-tinybird"
 version = "0.1.2"
 source = { editable = "." }
 dependencies = [
