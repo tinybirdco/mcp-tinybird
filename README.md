@@ -153,7 +153,3 @@ npx @modelcontextprotocol/inspector uv --directory /Users/alrocar/gr/mcp-tinybir
 ```
 
 Upon launching, the Inspector will display a URL that you can access in your browser to begin debugging.
-
-### Logging
-
-MCP Server logging traces are saved to the `tb_logs` DataSource in your Workspace.
