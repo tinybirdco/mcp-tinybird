@@ -1,4 +1,4 @@
-# tinybird_mcp_claude MCP server
+# Tinybird MCP Server
 
 A MCP server for Claude to interact with a Tinybird Workspace.
 
@@ -33,10 +33,10 @@ Paste this template in the file and replace `<TINYBIRD_API_URL>` and `<TINYBIRD_
 ```json
 {
     "mcpServers": {
-        "tinybird_mcp_claude": {
+        "mcp-tinybird": {
             "command": "uvx",
             "args": [
-                "tinybird-mcp-claude"
+                "mcp-tinybird"
             ],
             "env": {
                 "TB_API_URL": "<TINYBIRD_API_URL>",
@@ -53,7 +53,7 @@ Paste this template in the file and replace `<TINYBIRD_API_URL>` and `<TINYBIRD_
 ## Prompts
 
 The server provides a single prompt:
-- [tinybird-default](https://github.com/tinybirdco/tinybird_mcp_claude/blob/93dd9e1d3c0e33f408fe88297151a44c1dfc049c/src/tinybird_mcp_claude/server.py#L20): Assumes you have loaded some data in Tinybird and want help exploring it.
+- [tinybird-default](https://github.com/tinybirdco/mcp-tinybird/blob/93dd9e1d3c0e33f408fe88297151a44c1dfc049c/src/mcp-tinybird/server.py#L20): Assumes you have loaded some data in Tinybird and want help exploring it.
   - Requires a "topic" argument which defines the topic of the data you want to explore, for example, "Bluesky data" or "retail sales".
 
 You can configure additional prompt workflows:
@@ -94,13 +94,13 @@ TB_ADMIN_TOKEN=
 ```json
 {
   "mcpServers": {
-    "tinybird_mcp_claude_local": {
+    "mcp-tinybird-local": {
       "command": "uv",
       "args": [
         "--directory",
-        "/Users/alrocar/gr/tinybird_mcp_claude",
+        "/Users/alrocar/gr/mcp-tinybird",
         "run",
-        "tinybird-mcp-claude"
+        "mcp-tinybird"
       ]
     }
   }
@@ -141,7 +141,7 @@ experience, we strongly recommend using the [MCP Inspector](https://github.com/m
 You can launch the MCP Inspector via [`npm`](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) with this command:
 
 ```bash
-npx @modelcontextprotocol/inspector uv --directory /Users/alrocar/gr/tinybird_mcp_claude run tinybird-mcp-claude
+npx @modelcontextprotocol/inspector uv --directory /Users/alrocar/gr/mcp-tinybird run mcp-tinybird
 ```
 
 Upon launching, the Inspector will display a URL that you can access in your browser to begin debugging.
