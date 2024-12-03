@@ -22,7 +22,7 @@ export default function Home() {
           setToken(data.token)
         }
       } catch (err) {
-        setError('Failed to fetch token')
+        setError('Failed to fetch token: ' + err)
       }
     }
 
