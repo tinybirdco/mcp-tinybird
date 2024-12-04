@@ -11,6 +11,15 @@ from dotenv import load_dotenv
 from .tb import APIClient
 from tb.logger import TinybirdLoggingHandler
 import uuid
+from importlib.metadata import version
+
+
+def get_version():
+    try:
+        return version("mcp-tinybird")
+    except ImportError:
+        return "unknown"
+
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("mcp-tinybird")
@@ -32,6 +41,7 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logging_session = str(uuid.uuid4())
+extra = {"session": logging_session, "mcp_server_version": get_version()}
 
 
 PROMPT_TEMPLATE = """
@@ -126,7 +136,7 @@ tb_client = APIClient(api_url=TB_API_URL, token=TB_ADMIN_TOKEN)
 
 @server.list_resources()
 async def handle_list_resources() -> list[types.Resource]:
-    logger.info("Handling list_resources request", extra={"session": logging_session})
+    logger.info("Handling list_resources request", extra=extra)
     return [
         types.Resource(
             uri=AnyUrl("tinybird://insights"),
@@ -141,19 +151,15 @@ async def handle_list_resources() -> list[types.Resource]:
 async def handle_read_resource(uri: AnyUrl) -> str:
     logger.info(
         f"Handling read_resource request for URI: {uri}",
-        extra={"session": logging_session},
+        extra=extra,
     )
     if uri.scheme != "tinybird":
-        logger.error(
-            f"Unsupported URI scheme: {uri.scheme}", extra={"session": logging_session}
-        )
+        logger.error(f"Unsupported URI scheme: {uri.scheme}", extra=extra)
         raise ValueError(f"Unsupported URI scheme: {uri.scheme}")
 
     path = str(uri).replace("tinybird://", "")
     if not path or path != "insights":
-        logger.error(
-            f"Unknown resource path: {path}", extra={"session": logging_session}
-        )
+        logger.error(f"Unknown resource path: {path}", extra=extra)
         raise ValueError(f"Unknown resource path: {path}")
 
     return tb_client._synthesize_memo()
@@ -162,7 +168,7 @@ async def handle_read_resource(uri: AnyUrl) -> str:
 async def get_prompts():
     prompts = []
     try:
-        logger.info("Listing prompts", extra={"session": logging_session})
+        logger.info("Listing prompts", extra=extra)
         response = await tb_client.run_select_query(
             "SELECT * FROM prompts ORDER BY name, timestamp DESC LIMIT 1 by timestamp, name"
         )
@@ -183,11 +189,9 @@ async def get_prompts():
                         ],
                     )
                 )
-            logger.info(
-                f"Found {len(prompts)} prompts", extra={"session": logging_session}
-            )
+            logger.info(f"Found {len(prompts)} prompts", extra=extra)
     except Exception as e:
-        logging.error(f"error listing prompts: {e}", extra={"session": logging_session})
+        logging.error(f"error listing prompts: {e}", extra=extra)
 
     prompts.append(
         dict(
@@ -208,7 +212,7 @@ async def get_prompts():
 
 @server.list_prompts()
 async def handle_list_prompts() -> list[types.Prompt]:
-    logger.info("Handling list_prompts request", extra={"session": logging_session})
+    logger.info("Handling list_prompts request", extra=extra)
     prompts = await get_prompts()
     transformed_prompts = []
     for prompt in prompts:
@@ -228,13 +232,13 @@ async def handle_get_prompt(
 ) -> types.GetPromptResult:
     logger.info(
         f"Handling get_prompt request for {name} with args {arguments}",
-        extra={"session": logging_session},
+        extra=extra,
     )
 
     prompts = await get_prompts()
     prompt = next((p for p in prompts if p.get("name") == name), None)
     if not prompt:
-        logger.error(f"Unknown prompt: {name}", extra={"session": logging_session})
+        logger.error(f"Unknown prompt: {name}", extra=extra)
         raise ValueError(f"Unknown prompt: {name}")
 
     argument_names = prompt.get("arguments")
@@ -242,7 +246,7 @@ async def handle_get_prompt(
     params = {arg["name"]: arguments.get(arg["name"]) for arg in argument_names}
     logger.info(
         f"Generate prompt template for params: {params}",
-        extra={"session": logging_session},
+        extra=extra,
     )
     prompt = template.format(**params)
 
@@ -400,7 +404,7 @@ async def handle_call_tool(
     Tools can modify server state and notify clients of changes.
     """
     try:
-        logger.info(f"handle_call_tool {name}", extra={"session": logging_session})
+        logger.info(f"handle_call_tool {name}", extra=extra)
         if name == "list-data-sources":
             response = await tb_client.list_data_sources()
             return [
@@ -503,9 +507,7 @@ async def handle_call_tool(
         else:
             raise ValueError(f"Unknown tool: {name}")
     except Exception as e:
-        logger.error(
-            f"Error on handle call tool {name}", extra={"session": logging_session}
-        )
+        logger.error(f"Error on handle call tool {name} - {e}", extra=extra)
         raise e
 
 
@@ -517,7 +519,7 @@ async def main():
             write_stream,
             InitializationOptions(
                 server_name="mcp-tinybird",
-                server_version="0.1.2",
+                server_version=get_version(),
                 capabilities=server.get_capabilities(
                     notification_options=NotificationOptions(),
                     experimental_capabilities={},
