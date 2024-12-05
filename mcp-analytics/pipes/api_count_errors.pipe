@@ -1,0 +1,47 @@
+TOKEN "prometheus" READ
+
+NODE count_errors_node
+SQL >
+
+    SELECT app_name, version, tool, countMerge(errors) errors
+    FROM mv_count_mcp_errors_by_tool
+    group by app_name, version, tool
+
+
+
+NODE count_errors_metrics
+SQL >
+
+    SELECT
+        *,
+        arrayJoin(
+            [
+                map(
+                    'name',
+                    'errors_total',
+                    'type',
+                    'counter',
+                    'help',
+                    'total of errors',
+                    'value',
+                    toString(errors)
+                )
+            ]
+        ) as metrics_errors
+    FROM count_errors_node
+
+
+
+NODE count_errors_metrics_prom
+SQL >
+
+    SELECT
+        app_name,
+        metrics_errors['name'] as name,
+        metrics_errors['type'] as type,
+        metrics_errors['help'] as help,
+        toFloat64(metrics_errors['value']) as value,
+        map('app_name', app_name, 'version', version, 'tool', tool) as labels
+    FROM count_errors_metrics
+
+

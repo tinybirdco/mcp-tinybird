@@ -1,0 +1,19 @@
+NODE mv_mcp_logs_python_pipe_0
+SQL >
+
+    SELECT
+        app_name,
+        asctime as datetime,
+        funcName as func_name,
+        ifNull(extra_tool, '') as tool,
+        ifNull(extra_prompt, '') as prompt,
+        ifNull(extra_resource, '') as resource,
+        levelname as level,
+        extra_session as session,
+        extra_mcp_server_version as version
+    FROM mcp_logs_python
+
+TYPE materialized
+DATASOURCE mcp_monitoring
+
+

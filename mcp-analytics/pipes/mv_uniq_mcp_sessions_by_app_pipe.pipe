@@ -1,0 +1,18 @@
+NODE uniq_mcp_sessions_by_app_0
+SQL >
+
+    SELECT
+        toStartOfHour(datetime) AS datetime,
+        app_name,
+        ifNull(version, '') AS version,
+        uniqState(session) AS sessions
+    FROM mcp_monitoring
+    GROUP BY
+        datetime,
+        app_name,
+        version
+
+TYPE materialized
+DATASOURCE mv_uniq_mcp_sessions_by_app
+
+

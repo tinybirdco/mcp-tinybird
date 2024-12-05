@@ -1,0 +1,47 @@
+TOKEN "prometheus" READ
+
+NODE count_uniq_total_sessions
+SQL >
+
+    SELECT app_name, version, 'all' as tool, uniqMerge(sessions) total_sessions
+    FROM mv_uniq_mcp_sessions_by_app
+    group by app_name, version
+
+
+
+NODE count_uniq_total_sessions_metrics
+SQL >
+
+    SELECT
+        *,
+        arrayJoin(
+            [
+                map(
+                    'name',
+                    'uniq_total_sessions',
+                    'type',
+                    'gauge',
+                    'help',
+                    'total of uniq sessions',
+                    'value',
+                    toString(total_sessions)
+                )
+            ]
+        ) as metrics_uniq_total_sessions
+    FROM count_uniq_total_sessions
+
+
+
+NODE count_uniq_total_sessions_metrics_prom
+SQL >
+
+    SELECT
+        app_name,
+        metrics_uniq_total_sessions['name'] as name,
+        metrics_uniq_total_sessions['type'] as type,
+        metrics_uniq_total_sessions['help'] as help,
+        toFloat64(metrics_uniq_total_sessions['value']) as value,
+        map('app_name', app_name, 'version', version, 'tool', tool) as labels
+    FROM count_uniq_total_sessions_metrics
+
+

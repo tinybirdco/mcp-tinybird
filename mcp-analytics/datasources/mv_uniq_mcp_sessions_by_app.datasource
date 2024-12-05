@@ -1,0 +1,11 @@
+# Data Source created from Pipe 'uniq_mcp_sessions_by_app'
+
+SCHEMA >
+    `datetime` DateTime,
+    `app_name` String,
+    `version` String,
+    `sessions` AggregateFunction(uniq, String)
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(datetime)"
+ENGINE_SORTING_KEY "datetime, app_name, version"

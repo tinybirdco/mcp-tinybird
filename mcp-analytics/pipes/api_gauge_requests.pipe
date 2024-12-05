@@ -1,0 +1,48 @@
+TOKEN "prometheus" READ
+
+NODE gauge_requests_5m
+SQL >
+
+    SELECT app_name, ifNull(version, '') version, tool, count() requests
+    FROM mcp_monitoring
+    where datetime > now() - interval 5 minute
+    group by app_name, version, tool
+
+
+
+NODE gauge_requests_5m_metrics
+SQL >
+
+    SELECT
+        *,
+        arrayJoin(
+            [
+                map(
+                    'name',
+                    'requests_total_5m',
+                    'type',
+                    'gauge',
+                    'help',
+                    'total of requests 5m',
+                    'value',
+                    toString(requests)
+                )
+            ]
+        ) as metrics_requests_5m
+    FROM gauge_requests_5m
+
+
+
+NODE gauge_requests_5m_metrics_prom
+SQL >
+
+    SELECT
+        app_name,
+        metrics_requests_5m['name'] as name,
+        metrics_requests_5m['type'] as type,
+        metrics_requests_5m['help'] as help,
+        toFloat64(metrics_requests_5m['value']) as value,
+        map('app_name', app_name, 'version', version, 'tool', tool) as labels
+    FROM gauge_requests_5m_metrics
+
+

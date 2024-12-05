@@ -1,0 +1,34 @@
+TOKEN "mcp_public_write_token" APPEND
+
+
+SCHEMA >
+    `app_name` String `json:$.app_name`,
+    `asctime` DateTime64(3) `json:$.asctime`,
+    `created` Float64 `json:$.created`,
+    `extra_levelno` Int16 `json:$.extra.levelno`,
+    `extra_msg` String `json:$.extra.msg`,
+    `filename` String `json:$.filename`,
+    `formatted_message` String `json:$.formatted_message`,
+    `funcName` String `json:$.funcName`,
+    `level` Int16 `json:$.level`,
+    `levelname` String `json:$.levelname`,
+    `lineno` Int16 `json:$.lineno`,
+    `message` String `json:$.message`,
+    `module` String `json:$.module`,
+    `msecs` Float32 `json:$.msecs`,
+    `name` String `json:$.name`,
+    `pathname` String `json:$.pathname`,
+    `process` Int32 `json:$.process`,
+    `processName` String `json:$.processName`,
+    `relativeCreated` Float64 `json:$.relativeCreated`,
+    `thread` Int64 `json:$.thread`,
+    `threadName` String `json:$.threadName`,
+    `extra_session` String `json:$.extra.session`,
+    `extra_mcp_server_version` Nullable(String) `json:$.extra.mcp_server_version`,
+    `extra_tool` Nullable(String) `json:$.extra.tool`,
+    `extra_prompt` Nullable(String) `json:$.extra.prompt`,
+    `extra_resource` Nullable(String) `json:$.extra.resource`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(asctime)"
+ENGINE_SORTING_KEY "app_name, asctime"

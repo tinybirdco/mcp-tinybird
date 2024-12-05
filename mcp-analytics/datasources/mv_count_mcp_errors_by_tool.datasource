@@ -1,0 +1,12 @@
+# Data Source created from Pipe 'count_mcp_errors_by_app'
+
+SCHEMA >
+    `datetime` DateTime,
+    `app_name` String,
+    `version` String,
+    `tool` String,
+    `errors` AggregateFunction(count)
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(datetime)"
+ENGINE_SORTING_KEY "datetime, app_name, version, tool"
