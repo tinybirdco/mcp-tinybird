@@ -132,6 +132,7 @@ Start your first message fully in character with something like "Oh, Hey there! 
 server = Server("mcp-tinybird")
 
 tb_client = APIClient(api_url=TB_API_URL, token=TB_ADMIN_TOKEN)
+tb_logging_client = APIClient(api_url=LOGGING_TB_API_URL, token=LOGGING_TB_TOKEN)
 
 
 @server.list_resources()
@@ -143,6 +144,12 @@ async def handle_list_resources() -> list[types.Resource]:
             name="Insights from Tinybird",
             description="A living document of discovered insights",
             mimeType="text/plain",
+        ),
+        types.Resource(
+            uri=AnyUrl("tinybird://datasource-definition-context"),
+            name="Context for datasource definition",
+            description="Syntax and context to build .datasource datafiles",
+            mimeType="text/plain"
         )
     ]
 
@@ -151,48 +158,168 @@ async def handle_list_resources() -> list[types.Resource]:
 async def handle_read_resource(uri: AnyUrl) -> str:
     logger.info(
         f"Handling read_resource request for URI: {uri}",
-        extra=extra,
+        extra={**extra, "resource": uri},
     )
     if uri.scheme != "tinybird":
         logger.error(f"Unsupported URI scheme: {uri.scheme}", extra=extra)
         raise ValueError(f"Unsupported URI scheme: {uri.scheme}")
 
     path = str(uri).replace("tinybird://", "")
-    if not path or path != "insights":
-        logger.error(f"Unknown resource path: {path}", extra=extra)
-        raise ValueError(f"Unknown resource path: {path}")
+    
+    if path == "insights":
+        return tb_client._synthesize_memo()
+    if path == "datasource-definition-context":
+        return """
+<context>
+Your answer MUST conform to the Tinybird Datafile syntax. Do NOT use dashes when naming .datasource files.
 
-    return tb_client._synthesize_memo()
+```
+DESCRIPTION >
+    Analytics events **landing data source**
 
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `session_id` String `json:$.session_id`,
+    `action` LowCardinality(String) `json:$.action`,
+    `version` LowCardinality(String) `json:$.version`,
+    `payload` String `json:$.payload`,
+    `updated_at` DateTime DEFAULT now() `json:$.updated_at`
 
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SORTING_KEY "action, timestamp"
+ENGINE_TTL "timestamp + toIntervalDay(60)"
+ENGINE_SETTINGS "index_granularity=8192"
+```
+
+The supported values for `ENGINE` are the following:
+
+- `MergeTree`
+- `ReplacingMergeTree`
+- `SummingMergeTree`
+- `AggregatingMergeTree`
+- `CollapsingMergeTree`
+- `VersionedCollapsingMergeTree`
+- `Null`
+
+`ENGINE_VER <column_name>` Column with the version of the object state. Required when using `ENGINE ReplacingMergeTree`.
+`ENGINE_SIGN <column_name>` Column to compute the state. Required when using `ENGINE CollapsingMergeTree` or `ENGINE VersionedCollapsingMergeTree`
+`ENGINE_VERSION <column_name>` Column with the version of the object state. Required when `ENGINE VersionedCollapsingMergeTree`
+
+## Data types
+
+- `Int8`  , `Int16`  , `Int32`  , `Int64`  , `Int128`  , `Int256`
+- `UInt8`  , `UInt16`  , `UInt32`  , `UInt64`  , `UInt128`  , `UInt256`
+- `Float32`  , `Float64`
+- `Decimal`  , `Decimal(P, S)`  , `Decimal32(S)`  , `Decimal64(S)`  , `Decimal128(S)`  , `Decimal256(S)`
+- `String`
+- `FixedString(N)`
+- `UUID`
+- `Date`  , `Date32`
+- `DateTime([TZ])`  , `DateTime64(P, [TZ])`
+- `Bool`
+- `Array(T)`
+- `Map(K, V)`
+- `Tuple(K, V)`
+- `SimpleAggregateFunction`  , `AggregateFunction`
+- `LowCardinality`
+- `Nullable`
+
+## jsonpaths syntax
+
+For example, given this NDJSON object:
+
+{
+  "field": "test",
+  "nested": { "nested_field": "bla" },
+  "an_array": [1, 2, 3],
+  "a_nested_array": { "nested_array": [1, 2, 3] }
+} 
+
+The schema would be something like this:
+
+a_nested_array_nested_array Array(Int16) `json:$.a_nested_array.nested_array[:]`,
+an_array Array(Int16) `json:$.an_array[:]`,
+field String `json:$.field`,
+nested_nested_field String `json:$.nested.nested_field` Tinybird's JSONPath syntax support has some limitations: It support nested objects at multiple levels, but it supports nested arrays only at the first level, as in the example above. To ingest and transform more complex JSON objects, use the root object JSONPath syntax as described in the next section.
+
+## ENGINE_PARTITION_KEY
+
+Size partitions between 1 and 300Gb
+A SELECT query should read from less than 10 partitions
+An INSERT query should insert to one or two partition
+Total number of partitions should be hundreds maximum
+
+## ENGINE_SORTING_KEY
+
+Usually has 1 to 3 columns, from lowest cardinal on the left (and the most important for filtering) to highest cardinal (and less important for filtering).
+
+For timeseries it usually make sense to put timestamp as latest column in ENGINE_SORTING_KEY
+2 patterns: (…, toStartOf(Day|Hour|…)(timestamp), …, timestamp) and (…, timestamp). First one is useful when your often query small part of table partition.
+
+For Summing / AggregatingMergeTree all dimensions go to ENGINE_SORTING_KEY
+
+## SQL QUERIES
+
+- SQL queries should be compatible with ClickHouse SQL syntax. Do not add FORMAT in the SQL queries nor end the queries with semicolon ;
+- Do not use CTEs, only if they return a escalar value, use instead subqueries.
+- When possible filter by columns in the sorting key.
+- Do not create materialized pipes unless the user asks you.
+- To explore data use the run-select-query tool, to build API endpoints push pipes following the Pipe syntax
+
+```
+NODE daily_sales
+SQL >
+    %
+    SELECT day, country, sum(total_sales) as total_sales
+    FROM sales_by_hour
+    WHERE
+    day BETWEEN toStartOfDay(now()) - interval 1 day AND toStartOfDay(now())
+    and country = {{ String(country, 'US')}}
+    GROUP BY day, country
+
+NODE result
+SQL >
+    %
+    SELECT * FROM daily_sales
+    LIMIT {{Int32(page_size, 100)}}
+    OFFSET {{Int32(page, 0) * Int32(page_size, 100)}}
+```
+</context>
+"""
+
+prompts = []
 async def get_prompts():
-    prompts = []
-    try:
-        logger.info("Listing prompts", extra=extra)
-        response = await tb_client.run_select_query(
-            "SELECT * FROM prompts ORDER BY name, timestamp DESC LIMIT 1 by timestamp, name"
-        )
-        if response.get("data"):
-            for prompt in response.get("data"):
-                prompts.append(
-                    dict(
-                        name=prompt.get("name"),
-                        description=prompt.get("description"),
-                        prompt=prompt.get("prompt"),
-                        arguments=[
-                            dict(
-                                name=argument,
-                                description=argument,
-                                required=True,
-                            )
-                            for argument in prompt.get("arguments")
-                        ],
+    prompts.clear()
+    async def _get_remote_prompts(client: APIClient):
+        try:
+            logger.info("Listing prompts", extra=extra)
+            response = await client.run_select_query(
+                "SELECT * FROM prompts ORDER BY name, timestamp DESC LIMIT 1 by name"
+            )
+            if response.get("data"):
+                for prompt in response.get("data"):
+                    prompts.append(
+                        dict(
+                            name=prompt.get("name"),
+                            description=prompt.get("description"),
+                            prompt=prompt.get("prompt"),
+                            arguments=[
+                                dict(
+                                    name=argument,
+                                    description=argument,
+                                    required=True,
+                                )
+                                for argument in prompt.get("arguments")
+                            ],
+                        )
                     )
-                )
-            logger.info(f"Found {len(prompts)} prompts", extra=extra)
-    except Exception as e:
-        logging.error(f"error listing prompts: {e}", extra=extra)
+                logger.info(f"Found {len(prompts)} prompts", extra=extra)
+        except Exception as e:
+            logging.error(f"error listing prompts: {e}", extra=extra)
 
+    await _get_remote_prompts(tb_client)
+    await _get_remote_prompts(tb_logging_client)
     prompts.append(
         dict(
             name="tinybird-default",
@@ -232,10 +359,10 @@ async def handle_get_prompt(
 ) -> types.GetPromptResult:
     logger.info(
         f"Handling get_prompt request for {name} with args {arguments}",
-        extra=extra,
+        extra={**extra, "prompt": name},
     )
 
-    prompts = await get_prompts()
+    # prompts = await get_prompts()
     prompt = next((p for p in prompts if p.get("name") == name), None)
     if not prompt:
         logger.error(f"Unknown prompt: {name}", extra=extra)
@@ -404,7 +531,7 @@ async def handle_call_tool(
     Tools can modify server state and notify clients of changes.
     """
     try:
-        logger.info(f"handle_call_tool {name}", extra=extra)
+        logger.info(f"handle_call_tool {name}", extra={**extra, "tool": name})
         if name == "list-data-sources":
             response = await tb_client.list_data_sources()
             return [
