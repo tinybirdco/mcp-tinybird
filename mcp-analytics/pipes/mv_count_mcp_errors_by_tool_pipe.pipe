@@ -1,0 +1,21 @@
+NODE count_mcp_errors_by_app_0
+SQL >
+
+    SELECT
+        toStartOfHour(datetime) AS datetime,
+        app_name,
+        ifNull(version, '') AS version,
+        tool,
+        countState() AS errors
+    FROM mcp_monitoring
+    WHERE level = 'ERROR' or level = 'error'
+    GROUP BY
+        datetime,
+        app_name,
+        version,
+        tool
+
+TYPE materialized
+DATASOURCE mv_count_mcp_errors_by_tool
+
+

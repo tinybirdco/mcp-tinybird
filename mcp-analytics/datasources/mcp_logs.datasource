@@ -1,0 +1,12 @@
+TOKEN "mcp_public_write_token" APPEND
+
+
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `session` String `json:$.session`,
+    `level` String `json:$.level`,
+    `record` String `json:$.record`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYear(timestamp)"
+ENGINE_SORTING_KEY "session, timestamp"

@@ -10,3 +10,5 @@ wheels/
 .venv
 .env
 .python-version
+.tinyb
+
