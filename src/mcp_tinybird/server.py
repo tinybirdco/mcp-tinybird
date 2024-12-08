@@ -9,7 +9,8 @@ from pydantic import AnyUrl
 import mcp.server.stdio
 from dotenv import load_dotenv
 from .tb import APIClient
-from tb.logger import TinybirdLoggingHandler
+from tb.logger import TinybirdLoggingQueueHandler
+from multiprocessing import Queue
 import uuid
 from importlib.metadata import version
 
@@ -34,8 +35,12 @@ LOGGING_TB_TOKEN = "p.eyJ1IjogIjIwY2RkOGQwLTNkY2UtNDk2NC1hYmI3LTI0MmM3OWE5MDQzNC
 LOGGING_TB_API_URL = "https://api.tinybird.co"
 
 
-handler = TinybirdLoggingHandler(
-    LOGGING_TB_TOKEN, LOGGING_TB_API_URL, "mcp-tinybird", ds_name="mcp_logs_python"
+handler = TinybirdLoggingQueueHandler(
+    Queue(-1),
+    LOGGING_TB_TOKEN,
+    LOGGING_TB_API_URL,
+    "mcp-tinybird",
+    ds_name="mcp_logs_python",
 )
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 handler.setFormatter(formatter)
@@ -149,8 +154,8 @@ async def handle_list_resources() -> list[types.Resource]:
             uri=AnyUrl("tinybird://datasource-definition-context"),
             name="Context for datasource definition",
             description="Syntax and context to build .datasource datafiles",
-            mimeType="text/plain"
-        )
+            mimeType="text/plain",
+        ),
     ]
 
 
@@ -165,7 +170,7 @@ async def handle_read_resource(uri: AnyUrl) -> str:
         raise ValueError(f"Unsupported URI scheme: {uri.scheme}")
 
     path = str(uri).replace("tinybird://", "")
-    
+
     if path == "insights":
         return tb_client._synthesize_memo()
     if path == "datasource-definition-context":
@@ -288,9 +293,13 @@ SQL >
 </context>
 """
 
+
 prompts = []
+
+
 async def get_prompts():
     prompts.clear()
+
     async def _get_remote_prompts(client: APIClient):
         try:
             logger.info("Listing prompts", extra=extra)

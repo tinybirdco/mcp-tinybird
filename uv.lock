@@ -242,7 +242,7 @@ wheels = [
 
 [[package]]
 name = "mcp-tinybird"
-version = "0.1.6"
+version = "0.1.7"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
@@ -264,7 +264,7 @@ requires-dist = [
     { name = "mcp", specifier = ">=1.0.0" },
     { name = "pyproject-toml", marker = "extra == 'dev'", specifier = ">=0.0.10" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
-    { name = "tinybird-python-sdk", specifier = ">=0.1.2" },
+    { name = "tinybird-python-sdk", specifier = ">=0.1.6" },
 ]
 
 [[package]]
@@ -478,14 +478,14 @@ wheels = [
 
 [[package]]
 name = "tinybird-python-sdk"
-version = "0.1.2"
+version = "0.1.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7a/36/ad478e35e4d676dc341f4c3ee6d6a464033c0cc9c4eed2b4ad62902d28d7/tinybird_python_sdk-0.1.2.tar.gz", hash = "sha256:650ddd6a0c1294f1e1e011c57597028ee707977ab4dde484d2bc5296f0381d7e", size = 10903 }
+sdist = { url = "https://files.pythonhosted.org/packages/c4/5f/8d81e2382d330e8b90761077125fa89fa40be967314b05103362256c779b/tinybird_python_sdk-0.1.6.tar.gz", hash = "sha256:71d4d27d08ac82c6ea27036be82200610d764e0d43f0ffa35c0efa36597c01b5", size = 11993 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8a/3e/14aaf2ae6d40251bf5b169476cdb3c523730bee346a96ff1501e27c1348f/tinybird_python_sdk-0.1.2-py3-none-any.whl", hash = "sha256:5bcf215779a8f577d3e83c770397d3cbf9594dc9378477f7e60292313f0ad0c1", size = 10523 },
+    { url = "https://files.pythonhosted.org/packages/ee/94/ea70536529b0e4489064e56146cafeda049ad2b1f9ec891edaca0be8b7dc/tinybird_python_sdk-0.1.6-py3-none-any.whl", hash = "sha256:ac6ce2f2b9e62263dbb4e29cef41839528ce867ba235d04a1f660729d9708a05", size = 11782 },
 ]
 
 [[package]]
