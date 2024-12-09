@@ -20,4 +20,4 @@
           data_project_dir: ./mcp-analytics
         secrets:
           tb_admin_token: ${{ secrets.TB_ADMIN_TOKEN }}
-          tb_host: https://api.tinybird.coi
+          tb_host: https://api.tinybird.co
