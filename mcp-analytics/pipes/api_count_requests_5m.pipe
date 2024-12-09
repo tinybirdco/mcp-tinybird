@@ -5,7 +5,7 @@ SQL >
 
     SELECT app_name, version, tool, count() requests
     FROM mcp_monitoring
-    where datatime > now() - interval 5 minute
+    where datetime > now() - interval 5 minute
     group by app_name, version, tool
 
 
