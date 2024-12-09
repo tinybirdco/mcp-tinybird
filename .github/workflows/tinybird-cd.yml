@@ -1,0 +1,23 @@
+
+    ##################################################
+    ###   Visit https://github.com/tinybirdco/ci   ###
+    ###   for more details or custom CI/CD         ###
+    ##################################################
+
+    name: Tinybird - CD Workflow
+
+    on:
+      workflow_dispatch:
+      push:
+        paths:
+          - 'mcp-analytics/**'
+        branches:
+          - main
+    jobs:
+      cd:
+        uses: tinybirdco/ci/.github/workflows/cd.yml@v4.1.0
+        with:
+          data_project_dir: ./mcp-analytics
+        secrets:
+          tb_admin_token: ${{ secrets.TB_ADMIN_TOKEN }}
+          tb_host: https://api.tinybird.coi
