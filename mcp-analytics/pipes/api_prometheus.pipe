@@ -8,12 +8,6 @@ SQL >
     SELECT * FROM api_count_requests
     union all
     SELECT * FROM api_count_uniq_sessions
-    union all
-    SELECT * FROM api_gauge_errors
-    union all
-    SELECT * FROM api_gauge_requests
-    union all
-    SELECT * FROM api_gauge_uniq_sessions
 
 
 
