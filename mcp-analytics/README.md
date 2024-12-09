@@ -82,6 +82,9 @@ You should start seeing your metrics in Grafana to build your own dashboards and
 
 ![](./prometheus.png)
 
+A sample dashboard for Grafana can be found [here](./mcp-metrics.json)
+
+![](./dashboard.png)
 
 ## How to add more metrics
 
