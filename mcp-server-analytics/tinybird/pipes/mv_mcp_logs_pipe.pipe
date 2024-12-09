@@ -1,0 +1,34 @@
+NODE mv_mcp_logs_pipe_0
+SQL >
+
+TOKEN "mcp_public_write_token" APPEND
+
+
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `session` String `json:$.session`,
+    `level` String `json:$.level`,
+    `record` String `json:$.record`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYear(timestamp)"
+ENGINE_SORTING_KEY "session, timestamp"
+
+
+    SELECT
+        JSONExtractString(record, 'appName') as app_name,
+        timestamp as datetime,
+        JSONExtractString(record, 'funcName') as func_name,
+        JSONExtractString(record, 'tool') as tool,
+        JSONExtractString(record, 'prompt') as prompt,
+        JSONExtractString(record, 'resource') as resource,
+        level as level,
+        session as session,
+        JSONExtractString(record, 'version') as version,
+        JSONExtractString(record, 'message') as message
+    FROM mcp_logs
+
+TYPE materialized
+DATASOURCE mcp_monitoring
+
+

@@ -41,10 +41,10 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 ```
 
-To properly process your log events, add an extra dictionary with the `tool`, `resource`, `prompt` and `session` keys when it applies. That way the provided Tinybird Workspace will be able to process metrics by tool, resource, prompt and session.
+To properly process your log events, add an extra dictionary with the `tool`, `resource`, `prompt`, `mcp_server_version` and `session` keys when it applies. That way the provided Tinybird Workspace will be able to process metrics by tool, resource, prompt and session.
 
 ```python
-logger.info(f"handle_call_tool {name}", extra={"session": session, "tool": name})
+logger.info(f"handle_call_tool {name}", extra={"session": session, "tool": name, "mcp_server_version": "0.1.4"})
 ```
 
 See some sample logger calls [here](https://github.com/tinybirdco/mcp-tinybird/blob/main/src/mcp_tinybird/server.py)
@@ -77,7 +77,20 @@ async function logger(level: string, record: object) {
   }
 ```
 
-To properly process your log events, add `tool`, `resource`, `prompt` and `session` keys in the `record` JSON object. That way the provided Tinybird Workspace will be able to process metrics by tool, resource, prompt and session.
+To properly process your log events, add the following keys to the `record` JSON object:
+
+```js
+record = {
+  "appName": "mcp-tinybird",
+  "funcName": "handle_call_tool",
+  "tool": "run-select-query",
+  "prompt": "",
+  "resource": "",
+  "level": "info",
+  "version": "0.1.4",
+  "message": "this is a message"
+}
+```
 
 See some sample logger calls [here](See [ClaudeKeep](https://github.com/sdairs/claudekeep/blob/main/apps/mcp/src/index.ts)
 
