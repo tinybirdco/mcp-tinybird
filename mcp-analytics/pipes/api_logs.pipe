@@ -1,0 +1,12 @@
+TOKEN "prometheus" READ
+
+NODE logs
+SQL >
+    %
+    SELECT *
+        FROM mcp_monitoring
+        WHERE
+            datetime between parseDateTimeBestEffort({{DateTime(from_date)}}) and parseDateTimeBestEffort({{DateTime(to_date)}})
+            ORDER BY datetime desc
+            LIMIT {{Int32(page_size, 100)}}
+    OFFSET {{Int32(page, 0) * Int32(page_size, 100)}}
