@@ -14,9 +14,9 @@ Click the button below to deploy the project to your Tinybird Workspace.
 
 ## 2. Send log events 
 
-### Using Python
+### Using Python
 
-Add the following to your `requirements.txt` file:
+Add the following dependency to your `requirements.txt` file:
 
 ```
 tinybird-python-sdk>=0.1.6
@@ -81,7 +81,7 @@ To properly process your log events, add `tool`, `resource`, `prompt` and `sessi
 
 See some sample logger calls [here](See [ClaudeKeep](https://github.com/sdairs/claudekeep/blob/main/apps/mcp/src/index.ts)
 
-### Your Tinybird credentials
+### Your Tinybird credentials
 
 Your `TB_WRITE_TOKEN` can be found in the [Tinybird dashboard](https://app.tinybird.co/tokens) with the name `mcp_public_write_token`.
 
