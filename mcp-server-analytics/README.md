@@ -125,6 +125,8 @@ You should start seeing your metrics in Grafana to build your own dashboards and
 
 ![](./prometheus.png)
 
-A sample dashboard for Grafana can be found [here](./mcp-metrics.json)
+A sample dashboard for Grafana can be found [here](./mcp-server-metrics-with-logs-v1.json)
 
-![](./dashboard.png)
+Click the image to watch a video on how to import the Dashboard into Grafana
+
+[![Import Grafana Dashboard](./dashboard.png)](https://youtu.be/lOz5opvM24Q)
