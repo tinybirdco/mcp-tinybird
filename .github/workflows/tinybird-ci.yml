@@ -10,7 +10,7 @@
       workflow_dispatch:
       pull_request:
         paths:
-          - 'tinybird/**'
+          - 'mcp-server-analytics/tinybird/**'
         branches:
          - main
         types: [opened, reopened, labeled, unlabeled, synchronize, closed]
@@ -21,7 +21,7 @@
         ci:
           uses: tinybirdco/ci/.github/workflows/ci.yml@v4.1.0
           with:
-            data_project_dir: ./tinybird
+            data_project_dir: ./mcp-server-analytics/tinybird
           secrets:
             tb_admin_token: ${{ secrets.TB_ADMIN_TOKEN }}
             tb_host: https://api.tinybird.co
