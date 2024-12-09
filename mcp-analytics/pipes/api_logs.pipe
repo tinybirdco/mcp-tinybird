@@ -4,9 +4,23 @@ NODE logs
 SQL >
     %
     SELECT *
-        FROM mcp_monitoring
-        WHERE
-            datetime between parseDateTimeBestEffort({{DateTime(from_date)}}) and parseDateTimeBestEffort({{DateTime(to_date)}})
-            ORDER BY datetime desc
-            LIMIT {{Int32(page_size, 100)}}
-    OFFSET {{Int32(page, 0) * Int32(page_size, 100)}}
+    FROM mcp_monitoring
+    WHERE 1
+    {% if defined(date_from) and defined(date_to) %}
+      and datetime between parseDateTimeBestEffort({{String(date_from)}}) and parseDateTimeBestEffort({{String(date_to)}})
+    {% end %}
+    {% if defined(app_name) %}
+      and app_name in {{Array(app_name)}}
+    {% end %}
+    {% if defined(version) %}
+      and version in splitByChar(',', replaceRegexpAll({{String(version)}}, '[{}]', ''))
+    {% end %}
+    {% if defined(tool) %}
+      and version in splitByChar(',', replaceRegexpAll({{String(tool)}}, '[{}]', ''))
+    {% end %}
+    {% if defined(log) %}
+      and message like concat('%', {{String(log)}}, '%')
+    {% end %}
+        ORDER BY datetime desc
+        LIMIT {{Int32(page_size, 10000)}}
+        OFFSET {{Int32(page, 0) * Int32(page_size, 10000)}}
