@@ -39,6 +39,12 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 ```
 
+Your `TB_WRITE_TOKEN` can be found in the [Tinybird dashboard](https://app.tinybird.co/tokens) with the name `mcp_public_write_token`.
+
+Your `TB_API_URL` is the URL of your Tinybird region.
+
+![](./region.png)
+
 Start sending your MCP logs and errors:
 
 ```python
@@ -55,5 +61,9 @@ See logger calls [here](https://github.com/tinybirdco/mcp-tinybird/blob/main/src
 TODO
 
 ## Exploring and visualizing logs and metrics
+
+TODO
+
+## How to add more metrics
 
 TODO
