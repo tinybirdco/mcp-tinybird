@@ -1,16 +1,16 @@
 # Data Source created from Pipe 'mv_mcp_logs_python_pipe'
 
 SCHEMA >
-    `app_name` String,
-    `datetime` DateTime64(3),
-    `func_name` LowCardinality(String),
-    `tool` LowCardinality(String),
-    `prompt` LowCardinality(String),
-    `resource` LowCardinality(String),
-    `level` LowCardinality(String),
-    `session` String,
-    `version` Nullable(String),
-    `message` String
+    `app_name` String `json:$.app_name`,
+    `datetime` DateTime64(3) `json:$.datetime`,
+    `func_name` LowCardinality(String) `json:$.func_name`,
+    `tool` LowCardinality(String) `json:$.tool`,
+    `prompt` LowCardinality(String) `json:$.prompt`,
+    `resource` LowCardinality(String) `json:$.resource`,
+    `level` LowCardinality(String) `json:$.level`,
+    `session` String `json:$.session`,
+    `version` Nullable(String) `json:$.version`,
+    `message` String `json:$.message`
 
 ENGINE "MergeTree"
 ENGINE_PARTITION_KEY "toYYYYMM(datetime)"
