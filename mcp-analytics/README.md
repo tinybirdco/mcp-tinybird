@@ -2,7 +2,7 @@
 
 This is a Tinybird project that collects and stores MCP logs and metrics.
 
-## Quickstart
+## 1. Create a new Tinybird Workspace
 
 Click the button below to deploy the project to your Tinybird Workspace.
 
@@ -12,7 +12,7 @@ Click the button below to deploy the project to your Tinybird Workspace.
   </a>
 </p>
 
-## Logging a MCP server using the Python SDK
+## 2. Send log events using Python
 
 Add the following to your `requirements.txt` file:
 
@@ -56,11 +56,11 @@ Make sure you include an extra dictionary with the `tool`, `resource`, `prompt` 
 See logger calls [here](https://github.com/tinybirdco/mcp-tinybird/blob/main/src/mcp_tinybird/server.py)
 
 
-## Logging a MCP server using the TypeScript SDK
+### Send log events using TypeScript
 
 TODO
 
-## Exploring and visualizing logs and metrics using Grafana and Prometheus
+## 3. Monitor with Grafana and Prometheus
 
 Add this to your `prometheus.yml` file:
 
@@ -85,10 +85,3 @@ You should start seeing your metrics in Grafana to build your own dashboards and
 A sample dashboard for Grafana can be found [here](./mcp-metrics.json)
 
 ![](./dashboard.png)
-
-## How to add more metrics
-
-- Start sending your extra metrics from your MCP server.
-- Add a new column to `mcp_monitoring.datasource`.
-- Add a new `api_your_metrics.pipe` to publish your new metric and add it to the `api_prometheus.pipe`. Make sure no column is of type `Nullable(String)`.
-- `api_prometheus.pipe` is a Pipe that publishes all the metrics from the MCP server.
