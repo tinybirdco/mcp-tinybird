@@ -1,0 +1,19 @@
+NODE mv_mcp_logs_pipe_0
+SQL >
+    SELECT
+        JSONExtractString(record, 'appName') as app_name,
+        timestamp as datetime,
+        JSONExtractString(record, 'funcName') as func_name,
+        JSONExtractString(record, 'tool') as tool,
+        JSONExtractString(record, 'prompt') as prompt,
+        JSONExtractString(record, 'resource') as resource,
+        level as level,
+        session as session,
+        JSONExtractString(record, 'version') as version,
+        JSONExtractString(record, 'message') as message
+    FROM mcp_logs
+
+TYPE materialized
+DATASOURCE mcp_monitoring
+
+

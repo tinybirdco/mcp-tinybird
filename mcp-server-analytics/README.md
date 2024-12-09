@@ -12,9 +12,11 @@ Click the button below to deploy the project to your Tinybird Workspace.
   </a>
 </p>
 
-## 2. Send log events using Python
+## 2. Send log events 
 
-Add the following to your `requirements.txt` file:
+### Using Python
+
+Add the following dependency to your `requirements.txt` file:
 
 ```
 tinybird-python-sdk>=0.1.6
@@ -39,26 +41,67 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 ```
 
+To properly process your log events, add an extra dictionary with the `tool`, `resource`, `prompt`, `mcp_server_version` and `session` keys when it applies. That way the provided Tinybird Workspace will be able to process metrics by tool, resource, prompt and session.
+
+```python
+logger.info(f"handle_call_tool {name}", extra={"session": session, "tool": name, "mcp_server_version": "0.1.4"})
+```
+
+See some sample logger calls [here](https://github.com/tinybirdco/mcp-tinybird/blob/main/src/mcp_tinybird/server.py)
+
+### Using TypeScript
+
+```js
+const loggingToken = "<TB_WRITE_TOKEN>";
+const loggingEndpoint = "<TB_API_URL>/v0/events?name=mcp_logs";
+const loggingSession = crypto.randomUUID();
+
+async function logger(level: string, record: object) {
+  try {
+    await fetch(
+      loggingEndpoint,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          timestamp: new Date().toISOString(),
+          session: loggingSession,
+          level: level,
+          record: JSON.stringify(record)
+        }),
+        headers: { Authorization: `Bearer ${loggingToken}` }
+      }
+    )
+      .then((res: Response) => { /**process.stderr.write("logged");**/ });
+  } catch (error) {
+    // process.stderr.write("error logging");
+  }
+```
+
+To properly process your log events, add the following keys to the `record` JSON object:
+
+```js
+record = {
+  "appName": "mcp-tinybird",
+  "funcName": "handle_call_tool",
+  "tool": "run-select-query",
+  "prompt": "",
+  "resource": "",
+  "level": "info",
+  "version": "0.1.4",
+  "message": "this is a message"
+}
+```
+
+See some sample logger calls [here](See [ClaudeKeep](https://github.com/sdairs/claudekeep/blob/main/apps/mcp/src/index.ts)
+
+### Your Tinybird credentials
+
 Your `TB_WRITE_TOKEN` can be found in the [Tinybird dashboard](https://app.tinybird.co/tokens) with the name `mcp_public_write_token`.
 
 Your `TB_API_URL` is the URL of your Tinybird region.
 
 ![](./region.png)
 
-Start sending your MCP logs and errors:
-
-```python
-logger.info(f"handle_call_tool {name}", extra={**extra, "tool": name})
-```
-
-Make sure you include an extra dictionary with the `tool`, `resource`, `prompt` and `session` keys when it applies.
-
-See logger calls [here](https://github.com/tinybirdco/mcp-tinybird/blob/main/src/mcp_tinybird/server.py)
-
-
-### Send log events using TypeScript
-
-TODO
 
 ## 3. Monitor with Grafana and Prometheus
 
