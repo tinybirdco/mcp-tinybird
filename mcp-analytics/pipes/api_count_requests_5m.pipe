@@ -3,8 +3,9 @@ TOKEN "prometheus" READ
 NODE count_requests_node
 SQL >
 
-    SELECT app_name, version, tool, countMerge(requests) requests
-    FROM mv_count_mcp_logs_by_tool
+    SELECT app_name, version, tool, count() requests
+    FROM mcp_monitoring
+    where datatime > now() - interval 5 minute
     group by app_name, version, tool
 
 
@@ -18,11 +19,11 @@ SQL >
             [
                 map(
                     'name',
-                    'mcp_requests_total',
+                    'mcp_requests_total_5m',
                     'type',
                     'counter',
                     'help',
-                    'total of requests',
+                    'total of requests last 5 minutes',
                     'value',
                     toString(requests)
                 )
