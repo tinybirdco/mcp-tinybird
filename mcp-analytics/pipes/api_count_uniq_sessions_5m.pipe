@@ -3,7 +3,7 @@ TOKEN "prometheus" READ
 NODE count_uniq_total_sessions
 SQL >
 
-    SELECT app_name, version, 'all' as tool, uniq(session) total_sessions
+    SELECT app_name, ifNull(version, '') as version, 'all' as tool, uniq(session) total_sessions
     FROM mcp_monitoring
     where datetime > now() - interval 5 minute
     group by app_name, version, tool

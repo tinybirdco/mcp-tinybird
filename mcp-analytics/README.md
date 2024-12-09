@@ -60,10 +60,27 @@ See logger calls [here](https://github.com/tinybirdco/mcp-tinybird/blob/main/src
 
 TODO
 
-## Exploring and visualizing logs and metrics
+## Exploring and visualizing logs and metrics using Grafana and Prometheus
 
-TODO
+Add this to your `prometheus.yml` file:
+
+```yaml
+scrape_configs:
+  - job_name: mcp_server
+    scrape_interval: 15s  # Adjust the scrape interval as needed
+    scheme: 'https'
+    static_configs:
+      - targets: 
+        - 'api.tinybird.co'  # Adjust this for your region if necessary
+    metrics_path: '/v0/pipes/api_prometheus.prometheus'
+    bearer_token: '<your-public-prometheus-token>'
+```
+
+Find `<your-public-prometheus-token>` in the [Tinybird dashboard](https://app.tinybird.co/tokens) with the name `prometheus`.
 
 ## How to add more metrics
 
-TODO
+- Start sending your extra metrics from your MCP server.
+- Add a new column to `mcp_monitoring.datasource`.
+- Add a new `api_your_metrics.pipe` to publish your new metric and add it to the `api_prometheus.pipe`. Make sure no column is of type `Nullable(String)`.
+- `api_prometheus.pipe` is a Pipe that publishes all the metrics from the MCP server.
