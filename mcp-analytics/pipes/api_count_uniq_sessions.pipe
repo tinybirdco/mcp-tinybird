@@ -5,7 +5,7 @@ SQL >
 
     SELECT app_name, version, 'all' as tool, uniqMerge(sessions) total_sessions
     FROM mv_uniq_mcp_sessions_by_app
-    group by app_name, version
+    group by app_name, version, tool
 
 
 
