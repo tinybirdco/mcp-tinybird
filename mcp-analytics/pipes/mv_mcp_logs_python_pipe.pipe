@@ -10,7 +10,8 @@ SQL >
         ifNull(extra_resource, '') as resource,
         levelname as level,
         extra_session as session,
-        extra_mcp_server_version as version
+        extra_mcp_server_version as version,
+        extra_msg as message
     FROM mcp_logs_python
 
 TYPE materialized
