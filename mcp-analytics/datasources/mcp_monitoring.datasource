@@ -9,7 +9,8 @@ SCHEMA >
     `resource` LowCardinality(String),
     `level` LowCardinality(String),
     `session` String,
-    `version` Nullable(String)
+    `version` Nullable(String),
+    `message` String
 
 ENGINE "MergeTree"
 ENGINE_PARTITION_KEY "toYYYYMM(datetime)"
