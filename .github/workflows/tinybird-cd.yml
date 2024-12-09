@@ -10,14 +10,14 @@
       workflow_dispatch:
       push:
         paths:
-          - 'mcp-analytics/**'
+          - 'tinybird/**'
         branches:
           - main
     jobs:
       cd:
         uses: tinybirdco/ci/.github/workflows/cd.yml@v4.1.0
         with:
-          data_project_dir: ./mcp-analytics
+          data_project_dir: ./tinybird
         secrets:
           tb_admin_token: ${{ secrets.TB_ADMIN_TOKEN }}
           tb_host: https://api.tinybird.co
