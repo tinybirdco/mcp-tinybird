@@ -6,6 +6,7 @@ SQL >
     SELECT app_name, ifNull(version, '') as version, tool, count() errors
     FROM mcp_monitoring
     where datetime > now() - interval 5 minute
+    and level in ['error', 'ERROR', 'critical', 'CRITICAL']
     group by app_name, version, tool
 
 

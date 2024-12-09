@@ -78,7 +78,7 @@ scrape_configs:
 
 Find `<your-public-prometheus-token>` in the [Tinybird dashboard](https://app.tinybird.co/tokens) with the name `prometheus`.
 
-You should start seeing your metrics in Grafana.
+You should start seeing your metrics in Grafana to build your own dashboards and alerts.
 
 ![](./prometheus.png)
 
