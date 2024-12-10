@@ -153,3 +153,8 @@ npx @modelcontextprotocol/inspector uv --directory /Users/alrocar/gr/mcp-tinybir
 ```
 
 Upon launching, the Inspector will display a URL that you can access in your browser to begin debugging.
+
+### Monitoring
+
+To monitor the MCP server, you can use any compatible Prometheus client such as [Grafana](https://grafana.com/). Learn how to monitor your MCP server [here](./mcp-analytics/README.md).
+
