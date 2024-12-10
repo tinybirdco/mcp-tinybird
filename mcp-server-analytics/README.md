@@ -1,14 +1,20 @@
 # Tinybird MCP Analytics
 
-This is a Tinybird project that collects and stores MCP logs and metrics.
+This repo includes the necessary code to implement remote MCP Server Analytics using Tinybird. The project uses Python/Typescript logging handlers to send events to the Tinybird [Events API](https://www.tinybird.co/docs/ingest/events-api) transforms the events and publishes metrics as Prometheus endpoints that you can integrate with your preferred observability tool.
+
+**[Watch a video demo](https://www.youtube.com/watch?v=8MlFALTsUqY)**
 
 ## 1. Create a new Tinybird Workspace
 
-Click the button below to deploy the project to your Tinybird Workspace.
+Click the button below to deploy the project to your Tinybird Workspace. You'll be prompted to create a free Tinybird account if you don't yet have one. Deploying the project automatically creates:
 
-<p align="center">
+1. Data Sources to store the log events
+2. SQL Pipes to build metrics
+3. Published API endpoints in Prometheus format
+
+<p align="left">
   <a href="https://app.tinybird.co?starter_kit=https://github.com/tinybirdco/mcp-tinybird/mcp-server-analytics/tinybird">
-    <img width="300" src="https://img.shields.io/badge/Deploy%20to-Tinybird-25283d?style=flat&labelColor=25283d&color=27f795&logo=data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgNTAwIDUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNTAwIDQyLjhsLTE1Ni4xLTQyLjgtNTQuOSAxMjIuN3pNMzUwLjcgMzQ1LjRsLTE0Mi45LTUxLjEtODMuOSAyMDUuN3oiIGZpbGw9IiNmZmYiIG9wYWNpdHk9Ii42Ii8+PHBhdGggZD0iTTAgMjE5LjlsMzUwLjcgMTI1LjUgNTcuNS0yNjguMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=" />
+    <img width="200" src="https://img.shields.io/badge/Deploy%20to%20Tinybird-252b3d?logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDI2LjAuMiwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9Iklzb3R5cGUtV2hpdGUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIKCSB5PSIwcHgiIHZpZXdCb3g9IjAgMCA1MDAgNTAwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1MDAgNTAwOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+Cgkuc3Qwe29wYWNpdHk6MC42O2ZpbGw6I0ZGRkZGRjtlbmFibGUtYmFja2dyb3VuZDpuZXcgICAgO30KCS5zdDF7ZmlsbDojRkZGRkZGO30KPC9zdHlsZT4KPHBhdGggY2xhc3M9InN0MCIgZD0iTTUwMCw0Mi44TDM0My45LDBMMjg5LDEyMi43TDUwMCw0Mi44TDUwMCw0Mi44eiBNMzUwLjcsMzQ1LjRsLTE0Mi45LTUxLjFMMTIzLjksNTAwTDM1MC43LDM0NS40eiIvPgo8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMCwyMTkuOWwzNTAuNywxMjUuNWw1Ny41LTI2OC4yTDAsMjE5LjlMMCwyMTkuOXoiLz4KPC9zdmc+Cg==" />
   </a>
 </p>
 
