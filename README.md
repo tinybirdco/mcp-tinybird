@@ -107,6 +107,8 @@ TB_API_URL=
 TB_ADMIN_TOKEN=
 ```
 
+For local development, update your Claude Desktop configuration:
+
 ```json
 {
   "mcpServers": {
@@ -114,7 +116,7 @@ TB_ADMIN_TOKEN=
       "command": "uv",
       "args": [
         "--directory",
-        "/Users/alrocar/gr/mcp-tinybird",
+        "/path/to/your/mcp-tinybird",
         "run",
         "mcp-tinybird"
       ]
@@ -122,6 +124,21 @@ TB_ADMIN_TOKEN=
   }
 }
 ```
+
+<details>
+  <summary>Published Servers Configuration</summary>
+
+  ```json
+  "mcpServers": {
+    "mcp-tinybird": {
+      "command": "uvx",
+      "args": [
+        "mcp-tinybird"
+      ]
+    }
+  }
+  ```
+</details>
 
 ### Building and Publishing
 
