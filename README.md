@@ -15,6 +15,14 @@ An MCP server to interact with a Tinybird Workspace from any MCP client.
 
 ## Setup
 
+### Installation
+
+You can install the Tinybird MCP server using mcp-get:
+
+```bash
+npx @michaellatman/mcp-get@latest install mcp-tinybird
+```
+
 ### Prerequisites
 
 MCP is still very new and evolving, we recommend following the [MCP documentation](https://modelcontextprotocol.io/quickstart#prerequisites) to get the MCP basics up and running.
@@ -22,13 +30,12 @@ MCP is still very new and evolving, we recommend following the [MCP documentatio
 You'll need:
 - [Tinybird Account & Workspace](https://www.tinybird.co/)
 - [Claude Desktop](https://claude.ai/)
-- [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
 ### Configuration
 
 #### 1. Configure Claude Desktop
 
-Create the following file depending on your OS
+Create the following file depending on your OS:
 
 On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 
@@ -40,10 +47,7 @@ Paste this template in the file and replace `<TINYBIRD_API_URL>` and `<TINYBIRD_
 {
     "mcpServers": {
         "mcp-tinybird": {
-            "command": "uvx",
-            "args": [
-                "mcp-tinybird"
-            ],
+            "command": "mcp-tinybird",
             "env": {
                 "TB_API_URL": "<TINYBIRD_API_URL>",
                 "TB_ADMIN_TOKEN": "<TINYBIRD_ADMIN_TOKEN>"
@@ -91,7 +95,7 @@ The server implements several tools to interact with the Tinybird Workspace:
 
 ## Development
 
-### Config 
+### Config
 If you are working locally add two environment variables to a `.env` file in the root of the repository:
 
 ```sh
