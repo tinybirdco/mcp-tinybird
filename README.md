@@ -30,6 +30,7 @@ MCP is still very new and evolving, we recommend following the [MCP documentatio
 You'll need:
 - [Tinybird Account & Workspace](https://www.tinybird.co/)
 - [Claude Desktop](https://claude.ai/)
+- [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
 ### Configuration
 
@@ -47,7 +48,10 @@ Paste this template in the file and replace `<TINYBIRD_API_URL>` and `<TINYBIRD_
 {
     "mcpServers": {
         "mcp-tinybird": {
-            "command": "mcp-tinybird",
+            "command": "uvx",
+            "args": [
+                "mcp-tinybird"
+            ],
             "env": {
                 "TB_API_URL": "<TINYBIRD_API_URL>",
                 "TB_ADMIN_TOKEN": "<TINYBIRD_ADMIN_TOKEN>"
