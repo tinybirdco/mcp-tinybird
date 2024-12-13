@@ -1,6 +1,7 @@
 # Tinybird MCP server
 
 [![smithery badge](https://smithery.ai/badge/mcp-tinybird)](https://smithery.ai/protocol/mcp-tinybird)
+
 An MCP server to interact with a Tinybird Workspace from any MCP client.
 
 ## Features
@@ -18,7 +19,9 @@ An MCP server to interact with a Tinybird Workspace from any MCP client.
 
 ### Installation
 
-### Installing via Smithery
+#### Using MCP package managers
+
+**Smithery**
 
 To install Tinybird MCP for Claude Desktop automatically via [Smithery](https://smithery.ai/protocol/mcp-tinybird):
 
@@ -26,7 +29,9 @@ To install Tinybird MCP for Claude Desktop automatically via [Smithery](https://
 npx @smithery/cli install mcp-tinybird --client claude
 ```
 
-You can install the Tinybird MCP server using mcp-get:
+**mcp-get**
+
+You can install the Tinybird MCP server using [mcp-get](https://github.com/michaellatman/mcp-get):
 
 ```bash
 npx @michaellatman/mcp-get@latest install mcp-tinybird
