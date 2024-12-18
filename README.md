@@ -4,6 +4,8 @@
 
 An MCP server to interact with a Tinybird Workspace from any MCP client.
 
+<a href="https://glama.ai/mcp/servers/53l5ojnx30"><img width="380" height="200" src="https://glama.ai/mcp/servers/53l5ojnx30/badge" alt="Tinybird server MCP server" /></a>
+
 ## Features
 
 - Query Tinybird Data Sources using the Tinybird Query API
