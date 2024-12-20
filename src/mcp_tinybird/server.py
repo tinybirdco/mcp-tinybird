@@ -176,7 +176,9 @@ async def handle_read_resource(uri: AnyUrl) -> str:
     if path == "datasource-definition-context":
         return """
 <context>
-Your answer MUST conform to the Tinybird Datafile syntax. Do NOT use dashes when naming .datasource files.
+Your answer MUST conform to the Tinybird Datafile syntax. Do NOT use dashes when naming .datasource files. Use llms-tinybird-docs tool to check Tinybird documentation and fix errors.
+
+Tinybird schemas include jsonpaths syntax to extract data from json columns. Schemas are not fully compatible with ClickHouse SQL syntax.
 
 ```
 DESCRIPTION >
@@ -229,6 +231,7 @@ The supported values for `ENGINE` are the following:
 - `SimpleAggregateFunction`  , `AggregateFunction`
 - `LowCardinality`
 - `Nullable`
+- `JSON`
 
 ## jsonpaths syntax
 
@@ -247,6 +250,22 @@ a_nested_array_nested_array Array(Int16) `json:$.a_nested_array.nested_array[:]`
 an_array Array(Int16) `json:$.an_array[:]`,
 field String `json:$.field`,
 nested_nested_field String `json:$.nested.nested_field` Tinybird's JSONPath syntax support has some limitations: It support nested objects at multiple levels, but it supports nested arrays only at the first level, as in the example above. To ingest and transform more complex JSON objects, use the root object JSONPath syntax as described in the next section.
+
+You can wrap nested json objects in a JSON column, like this:
+
+```
+`nested_object` JSON `json:$.nested` DEFAULT '{}'
+```
+
+Always use DEFAULT modifiers:
+
+```
+`date` DateTime `json:$.date` DEFAULT now(),
+`test` String `json:$.test` DEFAULT 'test',
+`number` Int64 `json:$.number` DEFAULT 1,
+`array` Array(Int64) `json:$.array` DEFAULT [1, 2, 3],
+`map` Map(String, Int64) `json:$.map` DEFAULT {'a': 1, 'b': 2, 'c': 3},
+```
 
 ## ENGINE_PARTITION_KEY
 
