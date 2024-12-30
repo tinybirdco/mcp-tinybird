@@ -154,7 +154,11 @@ class APIClient:
 
         url = f"{self.api_url}/{endpoint}"
         response = await self.client.get(url, params=params)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            logger.error(f"Error in _get: {e}")
+            raise Exception(response.json().get("error", str(e))) from e
         return response.json()
 
     @log_function_call

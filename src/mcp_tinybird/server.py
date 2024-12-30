@@ -13,6 +13,12 @@ from tb.logger import TinybirdLoggingQueueHandler
 from multiprocessing import Queue
 import uuid
 from importlib.metadata import version
+from starlette.applications import Starlette
+from starlette.routing import Route
+from mcp.server.sse import SseServerTransport
+import uvicorn
+from starlette.responses import Response, JSONResponse
+import json
 
 
 def get_version():
@@ -138,6 +144,8 @@ server = Server("mcp-tinybird")
 
 tb_client = APIClient(api_url=TB_API_URL, token=TB_ADMIN_TOKEN)
 tb_logging_client = APIClient(api_url=LOGGING_TB_API_URL, token=LOGGING_TB_TOKEN)
+
+logger.info("Started MCP Tinybird")
 
 
 @server.list_resources()
@@ -666,12 +674,14 @@ async def handle_call_tool(
         raise e
 
 
-async def main():
-    # Run the server using stdin/stdout streams
-    async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
+sse = SseServerTransport("/messages")
+
+async def handle_sse(request):
+    async with sse.connect_sse(
+        request.scope, request.receive, request._send
+    ) as streams:
         await server.run(
-            read_stream,
-            write_stream,
+            streams[0], streams[1], 
             InitializationOptions(
                 server_name="mcp-tinybird",
                 server_version=get_version(),
@@ -679,5 +689,54 @@ async def main():
                     notification_options=NotificationOptions(),
                     experimental_capabilities={},
                 ),
-            ),
+            )
         )
+
+async def handle_messages(request):
+    # Create a response object first
+    default_response = Response(status_code=202)
+    
+    # Create a wrapper for send that will prevent double-sending
+    sent = False
+    async def wrapped_send(message):
+        nonlocal sent
+        if not sent:
+            try:
+                await request._send(message)
+                sent = True
+            except Exception as e:
+                logger.debug(f"Error in wrapped_send (might be normal): {e}")
+                # Don't re-raise - this might be expected if the client disconnected
+    
+    try:
+        # Handle the message
+        await sse.handle_post_message(
+            request.scope,
+            request.receive,
+            wrapped_send
+        )
+        
+        # Always return our response - if handle_post_message sent one,
+        # our wrapped_send will prevent double-sending
+        return default_response
+            
+    except Exception as e:
+        logger.error(f"Error handling message: {e}", exc_info=True)
+        if not sent:
+            return Response({"error": str(e)}, status_code=500)
+        # If we already sent an error response, return our default to prevent None
+        return default_response
+
+routes = [
+    Route("/sse", endpoint=handle_sse),
+    Route("/messages", endpoint=handle_messages, methods=["POST"])
+]
+
+app = Starlette(routes=routes)
+
+def start_server():
+    logger.info(f"Starting server on port 3001...")
+    uvicorn.run(app, host="0.0.0.0", port=3001, log_level="info")
+
+if __name__ == "__main__":
+    start_server()
