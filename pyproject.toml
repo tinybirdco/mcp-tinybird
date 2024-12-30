@@ -1,6 +1,6 @@
 [project]
 name = "mcp-tinybird"
-version = "0.1.8"
+version = "1.0.0"
 description = "An MCP server to interact with a Tinybird Workspace from any MCP client."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -19,7 +19,7 @@ requires = [ "hatchling",]
 build-backend = "hatchling.build"
 
 [project.scripts]
-mcp-tinybird = "mcp_tinybird:main"
+mcp-tinybird = "mcp_tinybird.__main__:main"
 
 [project.urls]
 homepage = "https://github.com/tinybirdco/mcp-tinybird"

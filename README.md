@@ -12,6 +12,8 @@ An MCP server to interact with a Tinybird Workspace from any MCP client.
 - Get the result of existing Tinybird API Endpoints with HTTP requests
 - Push Datafiles
 
+It supports both SSE and STDIO modes.
+
 ## Usage examples
 
 - [Bluesky metrics](https://bsky.app/profile/alasdairb.com/post/3lbx2mq5urk22) ([Claude transcript](https://www.tinybird.co/blog-posts/claude-analyze-bluesky-data-tinybird-mcp-server))
@@ -66,7 +68,8 @@ Paste this template in the file and replace `<TINYBIRD_API_URL>` and `<TINYBIRD_
         "mcp-tinybird": {
             "command": "uvx",
             "args": [
-                "mcp-tinybird"
+                "mcp-tinybird",
+                "stdio"
             ],
             "env": {
                 "TB_API_URL": "<TINYBIRD_API_URL>",
@@ -79,6 +82,16 @@ Paste this template in the file and replace `<TINYBIRD_API_URL>` and `<TINYBIRD_
 
 #### 2. Restart Claude Desktop
 
+
+#### SSE mode
+
+Alternatively, you can run the MCP server in SSE mode by running the following command:
+
+```bash
+uvx mcp-tinybird sse
+```
+
+This mode is useful to integrate with an MCP client that supports SSE (like a web app).
 
 ## Prompts
 
@@ -134,7 +147,8 @@ For local development, update your Claude Desktop configuration:
         "--directory",
         "/path/to/your/mcp-tinybird",
         "run",
-        "mcp-tinybird"
+        "mcp-tinybird",
+        "stdio"
       ]
     }
   }
