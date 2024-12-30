@@ -242,13 +242,15 @@ wheels = [
 
 [[package]]
 name = "mcp-tinybird"
-version = "0.1.8"
+version = "1.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
     { name = "mcp" },
     { name = "python-dotenv" },
+    { name = "starlette" },
     { name = "tinybird-python-sdk" },
+    { name = "uvicorn" },
 ]
 
 [package.optional-dependencies]
@@ -264,7 +266,9 @@ requires-dist = [
     { name = "mcp", specifier = ">=1.0.0" },
     { name = "pyproject-toml", marker = "extra == 'dev'", specifier = ">=0.0.10" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
+    { name = "starlette", specifier = ">=0.36.0" },
     { name = "tinybird-python-sdk", specifier = ">=0.1.6" },
+    { name = "uvicorn", specifier = ">=0.27.0" },
 ]
 
 [[package]]

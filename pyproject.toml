@@ -1,6 +1,6 @@
 [project]
 name = "mcp-tinybird"
-version = "1.0.0"
+version = "1.0.1"
 description = "An MCP server to interact with a Tinybird Workspace from any MCP client."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -9,6 +9,8 @@ dependencies = [
  "mcp>=1.0.0",
  "python-dotenv>=1.0.1",
  "tinybird-python-sdk>=0.1.6",
+ "uvicorn>=0.27.0",
+ "starlette>=0.36.0",
 ]
 [[project.authors]]
 name = "alrocar"
