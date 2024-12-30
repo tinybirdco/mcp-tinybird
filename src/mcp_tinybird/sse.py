@@ -21,36 +21,38 @@ class SSEHandler:
             )
 
     async def handle_messages(self, request):
-        # Track ASGI message state
-        response_started = False
-        
+        default_response = Response(status_code=202)
+
+        # Create a wrapper for send that will prevent double-sending
+        sent = False
         async def wrapped_send(message):
-            nonlocal response_started
-            message_type = message["type"]
-            
-            if message_type == "http.response.start":
-                if response_started:
-                    return
-                response_started = True
-                
-            await request._send(message)
-        
+            nonlocal sent
+            if not sent:
+                try:
+                    await request._send(message)
+                    sent = True
+                except Exception as e:
+                    logger.debug(f"Error in wrapped_send (might be normal): {e}")
+                    # Don't re-raise - this might be expected if the client disconnected
+
         try:
+            # Handle the message
             await self.sse.handle_post_message(
                 request.scope,
                 request.receive,
                 wrapped_send
             )
-            
-            if not response_started:
-                response = Response(status_code=202)
-                await response(request.scope, request.receive, request._send)
-                
+
+            # Always return our response - if handle_post_message sent one,
+            # our wrapped_send will prevent double-sending
+            return default_response
+
         except Exception as e:
             logger.error(f"Error handling message: {e}", exc_info=True)
-            if not response_started:
-                response = Response({"error": str(e)}, status_code=500)
-                await response(request.scope, request.receive, request._send)
+            if not sent:
+                return Response({"error": str(e)}, status_code=500)
+            # If we already sent an error response, return our default to prevent None
+            return default_response
 
     def get_routes(self):
         return [
