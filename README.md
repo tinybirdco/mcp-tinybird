@@ -30,7 +30,7 @@ It supports both SSE and STDIO modes.
 To install Tinybird MCP for Claude Desktop automatically via [Smithery](https://smithery.ai/protocol/mcp-tinybird):
 
 ```bash
-npx @smithery/cli install mcp-tinybird --client claude
+npx @smithery/cli install @tinybirdco/mcp-tinybird --client claude
 ```
 
 **mcp-get**
