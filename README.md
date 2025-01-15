@@ -1,6 +1,6 @@
 # Tinybird MCP server
 
-[![smithery badge](https://smithery.ai/badge/mcp-tinybird)](https://smithery.ai/protocol/mcp-tinybird)
+[![smithery badge](https://smithery.ai/badge/mcp-tinybird)](https://smithery.ai/server/@tinybirdco/mcp-tinybird)
 
 An MCP server to interact with a Tinybird Workspace from any MCP client.
 
