@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/tinybirdco-mcp-tinybird-badge.png)](https://mseep.ai/app/tinybirdco-mcp-tinybird)
+
 # Tinybird MCP server
 
 [![smithery badge](https://smithery.ai/badge/mcp-tinybird)](https://smithery.ai/server/@tinybirdco/mcp-tinybird)
