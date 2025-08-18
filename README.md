@@ -1,4 +1,5 @@
 # Tinybird MCP server
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/tinybirdco/mcp-tinybird)](https://archestra.ai/mcp-catalog/tinybirdco__mcp-tinybird)
 
 [![smithery badge](https://smithery.ai/badge/mcp-tinybird)](https://smithery.ai/server/@tinybirdco/mcp-tinybird)
 
