@@ -1,0 +1,21 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - tbApiUrl
+      - tbAdminToken
+    properties:
+      tbApiUrl:
+        type: string
+        description: The URL for the Tinybird API.
+      tbAdminToken:
+        type: string
+        description: The admin token for Tinybird.
+  commandFunction:
+    # A function that produces the CLI command to start the MCP on stdio.
+    |-
+    (config) => ({command:'uvx',args:['mcp-tinybird','stdio'],env:{TB_API_URL:config.tbApiUrl,TB_ADMIN_TOKEN:config.tbAdminToken}})
