@@ -1,6 +1,7 @@
 *Note*: This is an unofficial and unmaintained Tinybird MCP Server. Feel free to fork and modify it as a local MCP server for your needs. To use the official hosted Tinybird MCP Server, please refer to the [Tinybird MCP Server documentation](https://www.tinybird.co/docs/forward/analytics-agents/mcp).
 
 # Tinybird MCP server
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/tinybirdco/mcp-tinybird)](https://archestra.ai/mcp-catalog/tinybirdco__mcp-tinybird)
 
 [![smithery badge](https://smithery.ai/badge/mcp-tinybird)](https://smithery.ai/server/@tinybirdco/mcp-tinybird)
 
